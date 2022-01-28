@@ -21,3 +21,18 @@ yarn parcel src/index.html
 ```
 yarn build
 ```
+
+## Data structure
+
+- 64x40 grid
+- Player-state:
+-- x
+-- y
+-- dx
+-- dy
+- Pipe
+-- x
+-- y
+-- facing
+-- isBroken
+-- leakRate
