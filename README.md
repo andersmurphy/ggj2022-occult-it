@@ -2,7 +2,7 @@
 
 ## Play
 
-https://github.com/andersmurphy/ggj2022-occult-it.git
+https://andersmurphy.github.io/ggj2022-occult-it/
 
 ## Setup
 
