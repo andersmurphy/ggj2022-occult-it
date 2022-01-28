@@ -1,0 +1,15 @@
+{
+  "source": "src/index.html",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build"
+  },
+   "targets": {
+    "default": {
+      "distDir": "./docs"
+    }
+   },
+  "devDependencies": {
+    "parcel": "^2.2.1"
+  }
+}

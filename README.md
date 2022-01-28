@@ -1,2 +1,23 @@
-# ggj2022-occult-it
-Occult.it
+# Occult.it
+
+## Play
+
+http://dwergsaga.com/ggj2022-occult-it/
+
+## Setup
+
+```
+yarn add --dev parcel
+```
+
+## Dev server
+
+```
+yarn parcel src/index.html
+```
+
+## Deploy
+
+```
+yarn build
+```
