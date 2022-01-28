@@ -2,7 +2,7 @@
 
 ## Play
 
-https://dwergsaga.com/ggj2022-occult-it/
+https://github.com/andersmurphy/ggj2022-occult-it.git
 
 ## Setup
 
