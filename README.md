@@ -2,7 +2,7 @@
 
 ## Play
 
-http://dwergsaga.com/ggj2022-occult-it/
+https://dwergsaga.com/ggj2022-occult-it/
 
 ## Setup
 
