@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
 import { Player } from './player.js'
-import {makePipes, addPipes, debugPipes, pipesGridWidth, pipesGridHeight, addPipeAssets, Type, breakPipe} from './pipes.js'
+import {makePipes, addPipes, debugPipes, pipesGridWidth, pipesGridHeight, addPipeAssets, Type, breakPipe, checkFlooding} from './pipes.js'
 import state from './state.js'
 import { Vector2 } from './vector2.js'
 import renderState from './render-state.js'
@@ -28,7 +28,7 @@ export class OccultIt {
     create(destinationTileSize) {
         state.tiles = makePipes()
         renderState.pipes = Array(pipesGridWidth).fill(null).map(
-            () => Array(pipesGridHeight).fill(null).map(() => ({pipeSprite: null, breakSprite: null})))
+            () => Array(pipesGridHeight).fill(null).map(() => ({pipeSprite: null, breakSprite: null, floodGraphic: null})))
         //debugPipes()
         state.console = new Console(new Vector2(pipesGridWidth /2 - 1, pipesGridHeight / 2 - 1))
 
@@ -55,7 +55,7 @@ export class OccultIt {
 
         state.console.update()
 
-        if (Math.random() < 0.1) {
+        if (Math.random() < 0.01) {
             // Break a random pipe
             const breakPos = new Vector2(Math.random() * (pipesGridWidth - 1), Math.random() * (pipesGridHeight - 1))
             breakPos.set(Math.floor(breakPos.x), Math.floor(breakPos.y))
@@ -64,5 +64,7 @@ export class OccultIt {
                 breakPipe(breakPos, this.gameContainer)
             }
         }
+
+        checkFlooding()
     }
 }
