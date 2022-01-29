@@ -23,7 +23,7 @@ export class OccultIt {
 
     create(destinationTileSize) {
         state.pipes = makePipes()
-        state.players.push(new Player(new Vector2(0, 0), true))
+        state.players.push(new Player(new Vector2(pipesGridWidth / 2, pipesGridHeight / 2 + 5), true))
         debugPipes()
         this.gameContainer = this.engine.makeContainer()
         this.gameContainer.scale.set(destinationTileSize.width, destinationTileSize.height)

@@ -1,9 +1,11 @@
 import * as PIXI from 'pixi.js'
 import {Vector2} from './vector2'
 import keyboard from './keyboard'
+import { pipesGridWidth, pipesGridHeight, Type } from './pipes'
+import state from './state'
 
 const texture = require('../assets/Player.png')
-const speed = 0.5
+const speed = 0.3 // In tiles per frame
 
 export class Player {
     constructor(pos, isLocal) {
@@ -12,25 +14,26 @@ export class Player {
         this.isLocal = isLocal
         this.sprite = new PIXI.Sprite.from('player.png')
         this.sprite.anchor.set(0.5, 0.5)
-        this.sprite.scale.set(1/64, 1/64)
+        this.scale = 2
+        this.sprite.scale.set(this.scale / 64, this.scale / 64) // Scale the player to be ~2 tiles wide
         this.up = false
         this.down = false
         this.left = false
         this.right = false
 
-        const wKey = keyboard('w')
+        const wKey = keyboard(['w', 'W', 'ArrowUp'])
         wKey.press = () =>  this.up = true
         wKey.release = () => this.up = false
 
-        const sKey = keyboard('s')
+        const sKey = keyboard(['s', 'S', 'ArrowDown'])
         sKey.press = () =>  this.down = true
         sKey.release = () => this.down = false
 
-        const aKey = keyboard('a')
+        const aKey = keyboard(['a', 'A', 'ArrowLeft'])
         aKey.press = () =>  this.left = true
         aKey.release = () => this.left = false
 
-        const dKey = keyboard('d')
+        const dKey = keyboard(['d', 'D', 'ArrowRight'])
         dKey.press = () =>  this.right = true
         dKey.release = () => this.right = false
     }
@@ -59,15 +62,22 @@ export class Player {
 
 
             // Check collisions with pipes/edge
-            // if (nextPos.x < 0 || nextPos.x > width || nextPos)
+            if (nextPos.x < this.scale / 2 || nextPos.x > pipesGridWidth - this.scale / 2 || 
+                nextPos.y < this.scale / 2 || nextPos.y > pipesGridHeight - this.scale / 2 ) {
+                return
+            }
 
+            let tile = state.pipes[Math.floor(nextPos.x)][Math.floor(nextPos.y)]
+            if (tile.type !== Type.empty) {
+                return
+            }
             
             this.pos = nextPos
 
             // Update sprite 
             this.sprite.position.set(this.pos.x, this.pos.y)
 
-            if (this.vel.magnitudeSqr() > 0.1) {
+            if (this.vel.magnitudeSqr() > 0.001) {
                 const targetRotation = Math.atan2(this.vel.x, -this.vel.y)
 
                 if (Math.abs(this.sprite.rotation - targetRotation) < Math.PI) {
