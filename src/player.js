@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js'
 import {Vector2} from './vector2'
 import keyboard from './keyboard'
-import { pipesGridWidth, pipesGridHeight, Type, breakPipe } from './pipes'
+import { pipesGridWidth, pipesGridHeight, Type, breakPipe, fixPipe } from './pipes'
 import state from './state'
 import renderState from './render-state'
 
@@ -14,11 +14,13 @@ const timerSprites = [
     require('../images/Timer4.png'),
 ] 
 const breakDuration = 1200  // milliseconds
+const fixDuration = 2400  // milliseconds
 const speed = 0.2 // In tiles per frame
 
 export class Player {
     interacting
     breaking
+    fixing
 
     constructor(pos, isLocal, container) {
         this.pos = pos
@@ -34,6 +36,7 @@ export class Player {
         this.right = false
         this.interacting = null
         this.breaking = null
+        this.fixing = null
 
         const wKey = keyboard(['w', 'W', 'ArrowUp'])
         wKey.press = () =>  this.up = true
@@ -51,14 +54,19 @@ export class Player {
         dKey.press = () =>  this.right = true
         dKey.release = () => this.right = false
 
-        const rKey = keyboard(['r', 'R', ' '])
+        const rKey = keyboard(['r', 'R', ' ', 'p', 'P'])
         rKey.press = () => this.attemptToBreak(container)
+
+        const fKey = keyboard(['f', 'F', 'l', 'L'])
+        fKey.press = () => this.attemptToFix(container)
     }
 
     update(timeDelta, container) {
         if (this.isLocal) {
             if (this.breaking) {
                 this.updateBreaking(timeDelta, container)
+            } else if (this.fixing) {
+                this.updateFixing(timeDelta, container)
             } else {
                 this.updateInput()
             }
@@ -241,6 +249,58 @@ export class Player {
         container.removeChild(this.breaking.sprite)
         breakPipe(point, container)
         this.breaking = null
+    }
+
+    attemptToFix(container) {
+        if (this.interacting
+            && this.interacting.tile.type == Type.pipe
+            && this.interacting.tile.pipe.isBroken) {
+                const point = this.interacting.point
+
+                this.startFixPipe(point, container)
+                this.stopInteracting()
+            }
+    }
+
+    startFixPipe(point, container) {
+        const sprite = this.createTimerSprite('Timer4.png', point)
+
+        this.fixing = {
+            point,
+            time: 0,
+            sprite,
+        }
+        container.addChild(sprite)
+    }
+
+    updateFixing(timeDelta, container) {
+        const quarterDuration = Math.floor(fixDuration / 4)
+        const currentQuarter = Math.floor(this.fixing.time / quarterDuration)
+
+        this.fixing.time += timeDelta
+        if (this.fixing.time >= fixDuration) {
+            this.finishFixPipe(container)
+        } else {
+            const newQuarter = Math.floor(this.fixing.time / quarterDuration)
+
+            if (newQuarter != currentQuarter) {
+                const name = `Timer${4 - newQuarter}.png`
+                console.log(name)
+                const sprite = this.createTimerSprite(name, this.fixing.point)
+
+                container.removeChild(this.fixing.sprite)
+                this.fixing.sprite = sprite
+                container.addChild(sprite)
+            }
+        }
+    }
+
+    finishFixPipe(container) {
+        const point = this.fixing.point
+
+        container.removeChild(this.fixing.sprite)
+        fixPipe(point, container)
+        this.fixing = null
     }
 
     createTimerSprite(name, point, scale = 20) {

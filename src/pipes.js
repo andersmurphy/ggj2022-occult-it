@@ -340,3 +340,12 @@ export function breakPipe(point, container) {
     sprite.y = point.y
     sprite.scale.set(1 / 80, 1 / 80)
 }
+
+export function fixPipe(point, container) {
+    const sprite = renderState.pipes[point.x][point.y].breakSprite
+
+    container.removeChild(sprite)
+
+    renderState.pipes[point.x][point.y].breakSprite = null
+    state.tiles[point.x][point.y].pipe.isBroken = false
+}
