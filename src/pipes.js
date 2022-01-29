@@ -366,7 +366,7 @@ export function fixPipe(point, container) {
 }
 
 const maxFlooding = 30
-const floodChance = 0.02
+const floodChance = 0.01
 
 function renderFlood(x, y, tile) {
     const floodGraphic = renderState.pipes[x][y].floodGraphic
@@ -385,7 +385,7 @@ export function checkFlooding() {
             const tile = state.tiles[x][y]
             if (tile.type === Type.pipe) {
                 if (tile.pipe.isBroken) {
-                    tile.flooding = Math.min(tile.flooding + 1, maxFlooding)
+                    tile.flooding = Math.min(tile.flooding + 1, maxFlooding + 1)
                 } else {
                     tile.flooding = Math.max(tile.flooding - 1, 0)
                 }
@@ -402,14 +402,14 @@ export function checkFlooding() {
                             renderFlood(x, y, tile)
                         }
                     }
+            } else {
+                tile.evaporation--
+
+                if (tile.flooding > 0 && tile.evaporation == 0) {
+                    tile.flooding--
+                    tile.evaporation = 20
+                    renderFlood(x, y, tile)
                 }
-
-            tile.evaporation--
-
-            if (tile.flooding > 0 && tile.evaporation == 0) {
-                tile.flooding--
-                tile.evaporation = 20
-                renderFlood(x, y, tile)
             }
         }
     }
