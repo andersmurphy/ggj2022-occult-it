@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js'
 import { PixiEngine } from './pixi-engine.js'
 import { OccultIt } from './occult-it.js'
 import { pipesGridWidth, pipesGridHeight } from './pipes.js'
+import {} from './network.js'
 
 const spriteSheetPng = require('../images/spritesheet.png')
 
@@ -53,7 +54,7 @@ function calculateSize() {
     const boardTilesHorizontal = pipesGridWidth
     const boardTilesVertical = pipesGridHeight
     const isStandalone = ((window.navigator)['standalone']) == true
-    const width = isStandalone ? document.documentElement.clientWidth : window.innerWidth 
+    const width = isStandalone ? document.documentElement.clientWidth : window.innerWidth
     const height = isStandalone ? document.documentElement.clientHeight : window.innerHeight
 
     isLandscape = width > height
@@ -113,11 +114,11 @@ function create() {
     if (!isTouchScreen) {
         htmlContainer.focus();
     }
-    
+
     // Promise.all([
     //     pixelFont.load(),
     // ]).then(function(_) {
-    
+
     const loader = game.loadAssets()
 
     loader.load((loader, resources) => {
@@ -128,7 +129,7 @@ function create() {
         //     setupOnScreenControls()
         // }
         setInterval(update, 1000.0 / engine.fpsMax);
-        
+
         // let sheet = resources[spriteSheetJson].spritesheet;
 
         render();
