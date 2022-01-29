@@ -49,9 +49,10 @@ export class PixiEngine {
         src/*: string | string[]*/,
         sprite/*: { [name: string]: [number, number] | [number, number, boolean] }*/,
         callback/*: () => void*/)/*: void */ {
-        Howler.volume(0.25)
+        Howler.volume(1)
         this.audio = new Howl({ src, sprite })
         this.audio.on("load", callback)
+        this.audio.on("loaderror", (_, error) => console.log('Failed to load audio: ' + error))
     }
 
     onSpritesLoaded(engine/*: PixiEngine*/) {
