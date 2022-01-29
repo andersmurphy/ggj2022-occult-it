@@ -121,7 +121,7 @@ function create() {
 
     loader.load((loader, resources) => {
         //engine.loadAudio(audioSprites.urls, audioSprites.sprite, () => {
-        game.create();
+        game.create(destinationTileSize);
         //createFramerateCounter(htmlContainer);
         // if (isTouchScreen) {
         //     setupOnScreenControls()

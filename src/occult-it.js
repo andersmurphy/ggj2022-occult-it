@@ -21,11 +21,12 @@ export class OccultIt {
         return loader
     }
 
-    create() {
+    create(destinationTileSize) {
         state.pipes = makePipes()
         state.players.push(new Player(new Vector2(0, 0), true))
         debugPipes()
         this.gameContainer = this.engine.makeContainer()
+        this.gameContainer.scale.set(destinationTileSize.width, destinationTileSize.height)
         this.engine.stage.addChild(this.gameContainer)
 
         for (let player of state.players) {

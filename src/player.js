@@ -3,7 +3,7 @@ import {Vector2} from './vector2'
 import keyboard from './keyboard'
 
 const texture = require('../assets/Player.png')
-const speed = 5
+const speed = 0.5
 
 export class Player {
     constructor(pos, isLocal) {
@@ -12,6 +12,7 @@ export class Player {
         this.isLocal = isLocal
         this.sprite = new PIXI.Sprite.from('player.png')
         this.sprite.anchor.set(0.5, 0.5)
+        this.sprite.scale.set(1/64, 1/64)
         this.up = false
         this.down = false
         this.left = false
@@ -51,8 +52,19 @@ export class Player {
                 this.vel.x += speed
             }
 
-            this.pos.x += this.vel.x
-            this.pos.y += this.vel.y
+            const nextPos = this.pos.clone()
+
+            nextPos.x += this.vel.x
+            nextPos.y += this.vel.y
+
+
+            // Check collisions with pipes/edge
+            // if (nextPos.x < 0 || nextPos.x > width || nextPos)
+
+            
+            this.pos = nextPos
+
+            // Update sprite 
             this.sprite.position.set(this.pos.x, this.pos.y)
 
             if (this.vel.magnitudeSqr() > 0.1) {
