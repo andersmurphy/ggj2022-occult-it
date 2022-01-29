@@ -407,7 +407,6 @@ export function checkFlooding() {
             tile.evaporation--
 
             if (tile.flooding > 0 && tile.evaporation == 0) {
-                console.log('Evaporating')
                 tile.flooding--
                 tile.evaporation = 20
                 renderFlood(x, y, tile)
