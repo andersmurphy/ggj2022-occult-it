@@ -52,7 +52,7 @@ export class OccultIt {
 
         state.console.update()
 
-        if (Math.random() < 0.1) {
+        if (Math.random() < 0.01) {
             // Break a random pipe
             const breakPos = new Vector2(Math.random() * (pipesGridWidth - 1), Math.random() * (pipesGridHeight - 1))
             breakPos.set(Math.floor(breakPos.x), Math.floor(breakPos.y))

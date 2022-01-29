@@ -172,7 +172,7 @@ export class Player {
         while (tries > 0) {
             tries--
 
-            const spawnPos = new Vector2(Math.random() * (pipesGridWidth - 1), Math.random() * (pipesGridHeight - 1))
+            const spawnPos = new Vector2(1 + Math.random() * (pipesGridWidth - 3), 1 + Math.random() * (pipesGridHeight - 3))
             if (state.tiles[Math.floor(spawnPos.x)][Math.floor(spawnPos.y)].type === Type.empty) {
                 return new Player(spawnPos, true, container)
             }

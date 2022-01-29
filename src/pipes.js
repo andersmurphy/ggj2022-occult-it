@@ -323,6 +323,9 @@ export function addPipes(container) {
             floodGraphic.x = x
             floodGraphic.y = y
             floodGraphic.scale.set(1/50, 1/50)
+            floodGraphic.cacheAsBitmap = true
+            floodGraphic.beginFill(0x0000ff, 0.2)
+            // floodGraphic.drawRoundedRect(0, 0, 20, 20, 4)
             renderState.pipes[x][y].floodGraphic = floodGraphic
             container.addChild(floodGraphic)
 
@@ -353,21 +356,45 @@ export function breakPipe(point, container) {
     sprite.scale.set(1 / 80, 1 / 80)
 }
 
+const maxFlooding = 30
+const floodChance = 0.03
+
+function renderFlood(x, y, tile) {
+    const floodGraphic = renderState.pipes[x][y].floodGraphic
+    floodGraphic.cacheAsBitmap = false
+    floodGraphic.clear()
+    floodGraphic.beginFill(0x8888ee)
+    floodGraphic.drawRect(
+        25 - 25 * tile.flooding / maxFlooding, 25 - 25 * tile.flooding / maxFlooding,
+        50 * tile.flooding / maxFlooding, 50 * tile.flooding / maxFlooding, 4)
+    floodGraphic.cacheAsBitmap = true
+}
+
 export function checkFlooding() {
     for (let x = 0; x < pipesGridWidth; x++) {
         for (let y = 0; y < pipesGridHeight; y++) {
             const tile = state.tiles[x][y]
             if (tile.type === Type.pipe && tile.pipe.isBroken) {
-                state.tiles[x][y].flooding++
+                tile.flooding = Math.min(tile.flooding + 1, maxFlooding)
             }
 
-            if (y > 1 && state.tiles[x][y-1].flooding > tile.flooding) {
-                tile.flooding++
-                // console.log(renderState.pipes[x][y])
-                const floodGraphic = renderState.pipes[x][y].floodGraphic
-                floodGraphic.clear()
-                floodGraphic.beginFill(0x0000ff, 0.2)
-                floodGraphic.drawRoundedRect(0, 0, tile.flooding, tile.flooding, 4)
+            if ((x > 1 && state.tiles[x-1][y].flooding >= maxFlooding) ||
+                (x < pipesGridWidth - 2 && state.tiles[x+1][y].flooding >= maxFlooding) ||
+                (y > 1 && state.tiles[x][y-1].flooding >= maxFlooding) ||
+                (y < pipesGridHeight - 2 && state.tiles[x][y+1].flooding >= maxFlooding)) {
+                    if (tile.flooding < maxFlooding) {
+                        if (Math.random() < floodChance) {
+                            tile.flooding = Math.min(tile.flooding + 1, maxFlooding)
+                            renderFlood(x, y, tile)
+                        }
+                    }
+            } else {
+                if (tile.flooding > 0) {
+                    if (Math.random() < floodChance) {
+                        tile.flooding--
+                        renderFlood(x, y, tile)
+                    }
+                }
             }
         }
     }
