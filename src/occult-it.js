@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
 import { Player } from './player.js'
-import {makePipes, addPipes, debugPipes, pipesGridWidth, pipesGridHeight, addPipeAssets} from './pipes.js'
+import {makePipes, addPipes, debugPipes, pipesGridWidth, pipesGridHeight, addPipeAssets, Type, breakPipe} from './pipes.js'
 import state from './state.js'
 import { Vector2 } from './vector2.js'
 import renderState from './render-state.js'
@@ -47,6 +47,16 @@ export class OccultIt {
     update() {
         for (let player of state.players) {
             player.update()
+        }
+
+        if (Math.random() < 0.1) {
+            // Break a random pipe
+            const breakPos = new Vector2(Math.random() * (pipesGridWidth - 1), Math.random() * (pipesGridHeight - 1))
+            breakPos.set(Math.floor(breakPos.x), Math.floor(breakPos.y))
+            const pipeToBreak = state.pipes[breakPos.x][breakPos.y]
+            if (pipeToBreak.type === Type.pipe) {
+                breakPipe(breakPos, this.gameContainer)
+            }
         }
     }
 }

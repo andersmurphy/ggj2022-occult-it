@@ -327,3 +327,15 @@ export function addPipes(container) {
         }
     }
 }
+
+export function breakPipe(point, container) {
+    const sprite = PIXI.Sprite.from('BrokenPipeOverlay.png')
+
+    console.log(sprite)
+    renderState.pipes[point.x][point.y].breakSprite = sprite
+
+    container.addChild(sprite)
+    sprite.x = point.x
+    sprite.y = point.y
+    sprite.scale.set(1 / 80, 1 / 80)
+}

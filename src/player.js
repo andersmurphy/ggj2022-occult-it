@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js'
 import {Vector2} from './vector2'
 import keyboard from './keyboard'
-import { pipesGridWidth, pipesGridHeight, Type } from './pipes'
+import { pipesGridWidth, pipesGridHeight, Type, breakPipe } from './pipes'
 import state from './state'
 import renderState from './render-state'
 
@@ -114,7 +114,6 @@ export class Player {
 
             const spawnPos = new Vector2(Math.random() * (pipesGridWidth - 1), Math.random() * (pipesGridHeight - 1))
             if (state.pipes[Math.floor(spawnPos.x)][Math.floor(spawnPos.y)].type === Type.empty) {
-                console.log(spawnPos)
                 return new Player(spawnPos, true, container)
             }
         }
@@ -155,15 +154,7 @@ export class Player {
             && !this.interacting.tile.pipe.isBroken) {
                 this.interacting.tile.pipe.isBroken = true
                 const point = this.interacting.point
-                const sprite = PIXI.Sprite.from('BrokenPipeOverlay.png')
-
-                console.log(sprite)
-                renderState.pipes[point.x][point.y].breakSprite = sprite
-
-                container.addChild(sprite)
-                sprite.x = this.interacting.point.x
-                sprite.y = this.interacting.point.y
-                sprite.scale.set(1 / 80, 1 / 80)
+                breakPipe(point, container)
         }
     }
 }
