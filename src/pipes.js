@@ -50,7 +50,7 @@ export function addPipeAssets(loader) {
 
 export function makePipes() {
     const pipes = Array(pipesGridWidth).fill(null).map(
-        () => Array(pipesGridHeight).fill(null).map(() => ({type: Type.empty, pipe: null}))
+        () => Array(pipesGridHeight).fill(null).map(() => ({type: Type.empty, pipe: null, flooding: 0}))
     )
 
     const numPipes = 100
@@ -314,16 +314,28 @@ export function addPipes(container) {
                 else if (tile.pipe.dir === PipeDir.upRight) sprite = PIXI.Sprite.from('PipeNE.png')
                 else if (tile.pipe.dir === PipeDir.rightDown) sprite = PIXI.Sprite.from('PipeSE.png')
                 else if (tile.pipe.dir === PipeDir.bridge) sprite = PIXI.Sprite.from('PipeNSEW.png')
-                else { /*pre.append('+') */ }
+                else { }
             }
             else if (tile.type === Type.goal) { /* pre.append('*') */ }
+
+            const floodGraphic = new PIXI.Graphics()
+            // floodGraphic.cacheAsBitmap = true
+            floodGraphic.x = x
+            floodGraphic.y = y
+            floodGraphic.scale.set(1/50, 1/50)
+            renderState.pipes[x][y].floodGraphic = floodGraphic
+            container.addChild(floodGraphic)
+
+            // const floodTex = renderer.
+            // const floodSprite = 
+
 
             if (sprite) {
                 container.addChild(sprite)
                 sprite.x = x
                 sprite.y = y
                 sprite.scale.set(1 / 80, 1 / 80)
-                renderState.pipes[x][y] = { pipeSprite: sprite }
+                renderState.pipes[x][y].pipeSprite = sprite
             }
         }
     }
@@ -339,4 +351,24 @@ export function breakPipe(point, container) {
     sprite.x = point.x
     sprite.y = point.y
     sprite.scale.set(1 / 80, 1 / 80)
+}
+
+export function checkFlooding() {
+    for (let x = 0; x < pipesGridWidth; x++) {
+        for (let y = 0; y < pipesGridHeight; y++) {
+            const tile = state.tiles[x][y]
+            if (tile.type === Type.pipe && tile.pipe.isBroken) {
+                state.tiles[x][y].flooding++
+            }
+
+            if (y > 1 && state.tiles[x][y-1].flooding > tile.flooding) {
+                tile.flooding++
+                // console.log(renderState.pipes[x][y])
+                const floodGraphic = renderState.pipes[x][y].floodGraphic
+                floodGraphic.clear()
+                floodGraphic.beginFill(0x0000ff, 0.2)
+                floodGraphic.drawRoundedRect(0, 0, tile.flooding, tile.flooding, 4)
+            }
+        }
+    }
 }
