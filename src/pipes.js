@@ -1,10 +1,10 @@
 import {Vector2} from './vector2.js'
 
 // Tile types
-export class Tile {
-    static empty = new Tile('empty')
-    static pipe = new Tile('pipe')
-    static goal = new Tile('goal')
+export class Type {
+    static empty = new Type('empty')
+    static pipe = new Type('pipe')
+    static goal = new Type('goal')
 
     constructor(name) {
         this.name = name
@@ -16,23 +16,18 @@ export class PipeDir {
     static leftRight = 0
     static leftUp = 1
     static leftDown = 2
-    static upDown = 2
-    static upLeft = 3
+    static upDown = 3
     static upRight = 4
-    static rightUp = 5
-    static rightDown = 6
-    static downLeft = 7
-    static downRight = 8
-    static bridge = 9
+    static rightDown = 5
+    static bridge = 6
 }
-
 
 export function makePipes() {
     const width = 64
     const height = 40
     
     const pipes = Array(width).fill(null).map(
-        () => Array(height).fill(null).map(() => ({tile: Tile.empty, pipe: null}))
+        () => Array(height).fill(null).map(() => ({type: Type.empty, pipe: null}))
     )
 
     const numPipes = 10
@@ -66,7 +61,7 @@ export function makePipes() {
         const maxTries = 200
         let tries = maxTries
 
-        if (pipes[start.x][start.y].tile !== Tile.empty) {
+        if (pipes[start.x][start.y].type !== Type.empty) {
             // If we start on top of an existing pipe, immediately fail
             tries = 0
             break
@@ -78,7 +73,7 @@ export function makePipes() {
 
         for (let x = goal.x - 1; x <= goal.x + 1; x++) {
             for (let y = goal.y - 1; y <= goal.y + 1; y++) {
-                pipes[x][y].tile = Tile.goal
+                pipes[x][y].type = Type.goal
             }
         }
 
@@ -127,7 +122,7 @@ export function makePipes() {
                 continue
             }
 
-            if (pipes[next.x][next.y].tile === Tile.goal) {
+            if (pipes[next.x][next.y].type === Type.goal) {
                 break
             }
 
@@ -143,7 +138,7 @@ export function makePipes() {
             }
 
 
-            if (pipes[next.x][next.y].tile !== Tile.empty) {
+            if (pipes[next.x][next.y].type !== Type.empty) {
                 xFirst = !xFirst
                 continue
             }
@@ -154,12 +149,57 @@ export function makePipes() {
         }
 
         if (tries > 0) {
-            for (let pathElement of path) {
-                if (pipes[pathElement.x][pathElement.y].tile === `${i}`) {
-                    pipes[pathElement.x][pathElement.y].tile = Tile.pipe
+            // Fill in grid if pipe managed to path to exit
+            for (let i = 0; i < path.length; i++) {
+                const current = path[i]
+                const last = path[i-1]
+                const next = path[i+1]
+
+                let tile = pipes[current.x][current.y]
+                if (tile.type === Type.pipe) {  // TODO: Properly implement bridge making
+                    // Make a bridge if possible
+                    tile.pipe.dir = PipeDir.bridge
+                    tile.pipe.ids = [tile.pipe.id, i]
                 } else {
-                    pipes[pathElement.x][pathElement.y].tile = Tile.pipe
-                    pipes[pathElement.x][pathElement.y].pipe = {dir: PipeDir.upDown, id: i}  // TODO: Calculate direction properly
+                    tile.type = Type.pipe
+                    tile.pipe = {ids: [i]}
+
+                    if (last && next) {
+                        if (last.x === next.x) tile.pipe.dir = PipeDir.upDown
+                        else if (last.y === next.y) tile.pipe.dir = PipeDir.leftRight
+
+                        else if (last.x < next.x && last.y < next.y && current.x == next.x) tile.pipe.dir = PipeDir.leftDown
+                        else if (last.x < next.x && last.y < next.y && current.y == next.y) tile.pipe.dir = PipeDir.upRight
+
+                        else if (last.x < next.x && last.y > next.y && current.x == next.x) tile.pipe.dir = PipeDir.leftUp
+                        else if (last.x < next.x && last.y > next.y && current.y == next.y) tile.pipe.dir = PipeDir.rightDown
+
+                        else if (last.x > next.x && last.y < next.y && current.x == next.x) tile.pipe.dir = PipeDir.rightDown
+                        else if (last.x > next.x && last.y < next.y && current.y == next.y) tile.pipe.dir = PipeDir.leftUp
+
+                        else if (last.x > next.x && last.y > next.y && current.x == next.x) tile.pipe.dir = PipeDir.upRight
+                        else if (last.x > next.x && last.y > next.y && current.y == next.y) tile.pipe.dir = PipeDir.leftDown
+
+                    } else if (next) {
+                        // Get direction for edge pipes
+                        if (current.x === 0) {
+                            if (next.x > current.x)      tile.pipe.dir = PipeDir.leftRight
+                            else if (next.y > current.y) tile.pipe.dir = PipeDir.leftUp
+                            else if (next.y < current.y) tile.pipe.dir = PipeDir.leftDown
+                        } else if (current.x === width - 1) {
+                            if (next.x < current.x)      tile.pipe.dir = PipeDir.leftRight
+                            else if (next.y > current.y) tile.pipe.dir = PipeDir.upRight
+                            else if (next.y < current.y) tile.pipe.dir = PipeDir.rightDown
+                        } else if (current.y === 0) {
+                            if (next.x < current.x)      tile.pipe.dir = PipeDir.leftUp
+                            else if (next.x > current.x) tile.pipe.dir = PipeDir.upRight
+                            else if (next.y < current.y) tile.pipe.dir = PipeDir.upDown
+                        } else if (current.y === height - 1) {
+                            if (next.x < current.x)      tile.pipe.dir = PipeDir.leftDown
+                            else if (next.x > current.x) tile.pipe.dir = PipeDir.rightDown
+                            else if (next.y < current.y) tile.pipe.dir = PipeDir.upDown
+                        }
+                    }
                 }
             }
         }
@@ -172,11 +212,19 @@ export function debugPipes() {
     let pre = document.createElement('pre')
     for (let y = 0; y < 40; y++) {
         for (let x = 0; x < 64; x++) {
-            const tile = pipes[x][y].tile
+            const tile = pipes[x][y]
 
-            if (tile === Tile.empty) pre.append(' ')
-            else if (tile === Tile.pipe) pre.append('#')
-            else if (tile === Tile.goal) pre.append('*')
+            if (tile.type === Type.empty) pre.append(' ')
+            else if (tile.type === Type.pipe) {
+                if (tile.pipe.dir === PipeDir.leftRight) pre.append('═')
+                else if (tile.pipe.dir === PipeDir.upDown) pre.append('║')
+                else if (tile.pipe.dir === PipeDir.leftUp) pre.append('╝')
+                else if (tile.pipe.dir === PipeDir.leftDown) pre.append('╗')
+                else if (tile.pipe.dir === PipeDir.upRight) pre.append('╚')
+                else if (tile.pipe.dir === PipeDir.rightDown) pre.append('╔')
+                else pre.append('+')
+            }
+            else if (tile.type === Type.goal) pre.append('*')
         }
         pre.append('\n')
     }
