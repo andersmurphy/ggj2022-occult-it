@@ -5,7 +5,21 @@ import state from './state.js'
 export const pipesGridWidth = 64
 export const pipesGridHeight = 40
 
-const PipeNS = require('../assets/PipeNS.png')
+const PipeNS = require('../images/PipeNS.png')
+const PipeEW = require('../images/PipeEW.png')
+const PipeNE = require('../images/PipeNE.png')
+const PipeNSEW = require('../images/PipeNSEW.png')
+const PipeNW = require('../images/PipeNW.png')
+const PipeSE = require('../images/PipeSE.png')
+const PipeSW = require('../images/PipeSW.png')
+
+let spritePipeNS 
+let spritePipeEW 
+let spritePipeNE 
+let spritePipeNSEW
+let spritePipeNW 
+let spritePipeSE 
+let spritePipeSW 
 
 // Tile types
 export class Type {
@@ -31,6 +45,22 @@ export class PipeDir {
 
 export function addPipeAssets(loader) {
     loader.add('PipeNS.png', PipeNS)
+    loader.add('PipeEW.png', PipeEW)
+    loader.add('PipeNE.png', PipeNE)
+    loader.add('PipeNSEW.png', PipeNSEW)
+    loader.add('PipeNW.png', PipeNW)
+    loader.add('PipeSE.png', PipeSE)
+    loader.add('PipeSW.png', PipeSW)
+}
+
+export function loadPipeSprites() {
+    spritePipeNS = PIXI.Sprite.from('PipeNS.png')
+    spritePipeEW = PIXI.Sprite.from('PipeEW.png')
+    spritePipeNE = PIXI.Sprite.from('PipeNE.png')
+    spritePipeNSEW = PIXI.Sprite.from('PipeNSEW.png')
+    spritePipeNW = PIXI.Sprite.from('PipeNW.png')
+    spritePipeSE = PIXI.Sprite.from('PipeSE.png')
+    spritePipeSW = PIXI.Sprite.from('PipeSW.png')
 }
 
 export function makePipes() {
@@ -240,8 +270,8 @@ export function makePipes() {
 
 export function debugPipes() {
     let pre = document.createElement('pre')
-    for (let y = 0; y < 40; y++) {
-        for (let x = 0; x < 64; x++) {
+    for (let y = 0; y < pipesGridHeight; y++) {
+        for (let x = 0; x < pipesGridWidth; x++) {
             const tile = state.pipes[x][y]
 
             if (tile.type === Type.empty) pre.append(' ')
@@ -260,4 +290,40 @@ export function debugPipes() {
         pre.append('\n')
     }
     document.body.append(pre)
+}
+
+export function addPipes(container) {
+    for (let y = 0; y < pipesGridHeight; y++) {
+        for (let x = 0; x < pipesGridWidth; x++) {
+            const tile = state.pipes[x][y]
+            let sprite = undefined
+
+            if (tile.type === Type.empty) { }
+            else if (tile.type === Type.pipe) {
+                if (tile.pipe.dir === PipeDir.leftRight) sprite = PIXI.Sprite.from('PipeEW.png')
+                else if (tile.pipe.dir === PipeDir.upDown) sprite = PIXI.Sprite.from('PipeNS.png')
+                else if (tile.pipe.dir === PipeDir.leftUp) sprite = PIXI.Sprite.from('PipeNW.png')
+                else if (tile.pipe.dir === PipeDir.leftDown) sprite = PIXI.Sprite.from('PipeSW.png')
+                else if (tile.pipe.dir === PipeDir.upRight) sprite = PIXI.Sprite.from('PipeNE.png')
+                else if (tile.pipe.dir === PipeDir.rightDown) sprite = PIXI.Sprite.from('PipeSE.png')
+                else if (tile.pipe.dir === PipeDir.bridge) sprite = PIXI.Sprite.from('PipeNSEW.png')
+                else { /*pre.append('+') */ }
+            }
+            else if (tile.type === Type.goal) { /* pre.append('*') */ }
+
+            if (sprite) {
+                const xx = x* 11
+                const yy = y* 11
+
+                console.log(xx)
+                container.addChild(sprite)
+                sprite.x = xx
+                sprite.y = yy
+                sprite.width = 11
+                sprite.height = 11
+                console.log(sprite.anchor)
+            }
+        }
+    }
+
 }

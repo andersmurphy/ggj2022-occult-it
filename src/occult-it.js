@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
 import { Player } from './player.js'
-import {makePipes, debugPipes, pipesGridWidth, pipesGridHeight, addPipeAssets} from './pipes.js'
+import {makePipes, addPipes, debugPipes, pipesGridWidth, pipesGridHeight, addPipeAssets} from './pipes.js'
 import state from './state.js'
 import { Vector2 } from './vector2.js'
 
@@ -24,9 +24,11 @@ export class OccultIt {
     create() {
         state.pipes = makePipes()
         state.players.push(new Player(new Vector2(pipesGridWidth / 2, pipesGridHeight / 2 - 5)))
-        debugPipes()
+        //debugPipes()
         this.gameContainer = this.engine.makeContainer()
         this.engine.stage.addChild(this.gameContainer)
+
+        addPipes(this.gameContainer)
 
         for (let player of state.players) {
             this.gameContainer.addChild(player.sprite)

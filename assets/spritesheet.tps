@@ -136,7 +136,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename></filename>
+                <filename>../images/spritesheet.json</filename>
             </struct>
         </map>
         <key>multiPack</key>
@@ -197,6 +197,21 @@
                 <rect>21,21,41,41</rect>
                 <key>scale9Paddings</key>
                 <rect>21,21,41,41</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">Player.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,6,32,13</rect>
+                <key>scale9Paddings</key>
+                <rect>16,6,32,13</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
