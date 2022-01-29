@@ -35,7 +35,7 @@ export class OccultIt {
         this.gameContainer = this.engine.makeContainer()
         this.gameContainer.scale.set(destinationTileSize.width, destinationTileSize.height)
         this.engine.stage.addChild(this.gameContainer)
-        this.players.push(Player.spawn(this.gameContainer))
+        this.players.push(Player.spawn(this.gameContainer, this.engine.audio))
         state.players.push(this.players[this.players.length - 1])
 
         addPipes(this.gameContainer)

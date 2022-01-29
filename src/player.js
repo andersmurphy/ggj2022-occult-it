@@ -22,8 +22,10 @@ export class Player {
     breaking
     fixing
     movement
+    audio
 
-    constructor(movement, isLocal, container) {
+    constructor(movement, isLocal, container, audio) {
+        this.audio = audio
         this.movement = movement
         this.isLocal = isLocal
         this.sprite = PIXI.Sprite.from('player.png')
@@ -155,17 +157,6 @@ export class Player {
         rayEnd.x += normal.x
         rayEnd.y += normal.y
 
-        // Check collisions with pipes/edge
-        if (rayEnd.x < this.scale / 2 || rayEnd.x > pipesGridWidth - this.scale / 2) {
-            this.stopInteracting()
-            return
-        }
-
-        if (rayEnd.y < this.scale / 2 || rayEnd.y > pipesGridHeight - this.scale / 2 ) {
-            this.stopInteracting()
-            return
-        }
-
         let interactionPoint = new Vector2(Math.floor(rayEnd.x), Math.floor(rayEnd.y))
         let tile = state.tiles[interactionPoint.x][interactionPoint.y]
 
@@ -182,6 +173,7 @@ export class Player {
 
         this.breaking.time += timeDelta
         if (this.breaking.time >= breakDuration) {
+            this.audio.play("break4")
             this.finishBreakPipe(container)
         } else {
             const newQuarter = Math.floor(this.breaking.time / quarterDuration)
@@ -189,15 +181,18 @@ export class Player {
             if (newQuarter != currentQuarter) {
                 const name = `Timer${4 - newQuarter}.png`
                 const sprite = this.createTimerSprite(name, this.breaking.point)
-
+                
                 container.removeChild(this.breaking.sprite)
                 this.breaking.sprite = sprite
                 container.addChild(sprite)
+
+                const audioName = `break${newQuarter}`
+                this.audio.play(audioName)
             }
         }
     }
 
-    static spawn(container) {
+    static spawn(container, audio) {
         let tries = 1000
 
         while (tries > 0) {
@@ -209,7 +204,7 @@ export class Player {
                     pos: spawnPos,
                     vel: new Vector2(),
                 }
-                return new Player(movement, true, container)
+                return new Player(movement, true, container, audio)
             }
         }
     }
@@ -306,6 +301,7 @@ export class Player {
 
         this.fixing.time += timeDelta
         if (this.fixing.time >= fixDuration) {
+            this.audio.play("fix4")
             this.finishFixPipe(container)
         } else {
             const newQuarter = Math.floor(this.fixing.time / quarterDuration)
@@ -317,6 +313,9 @@ export class Player {
                 container.removeChild(this.fixing.sprite)
                 this.fixing.sprite = sprite
                 container.addChild(sprite)
+
+                const audioName = `fix${newQuarter}`
+                this.audio.play(audioName)
             }
         }
     }

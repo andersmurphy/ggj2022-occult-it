@@ -4,9 +4,13 @@ import { OccultIt } from './occult-it.js'
 import { pipesGridWidth, pipesGridHeight } from './pipes.js'
 import {} from './network.js'
 
-const spriteSheetPng = require('../images/spritesheet.png')
-
-//const audioSprites = require('../audio/output.json')
+const audioSprites = require('../audio/output.json')
+const audioFiles = [
+    new URL('../audio/output.ac3', import.meta.url),
+    new URL('../audio/output.m4a', import.meta.url),
+    new URL('../audio/output.mp3', import.meta.url),
+    new URL('../audio/output.ogg', import.meta.url),
+]
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR
 PIXI.settings.ROUND_PIXELS = false
@@ -27,6 +31,7 @@ window.document.addEventListener('DOMContentLoaded', load)
 
 function load() {
     //window.localStorage.clear();
+    console.log(audioFiles)
     setup()
     window.onresize = handleResize
     window.document.onfullscreenchange = handleResize
@@ -115,15 +120,25 @@ function create() {
     const loader = game.loadAssets()
 
     loader.load((loader, resources) => {
-        //engine.loadAudio(audioSprites.urls, audioSprites.sprite, () => {
-        game.create(destinationTileSize);
-        //createFramerateCounter(htmlContainer);
-        // if (isTouchScreen) {
-        //     setupOnScreenControls()
-        // }
-        setInterval(update, 1000.0 / engine.fpsMax);
+        const exportedUrls = []
 
-        render();
+        audioFiles.forEach(audioFile => {
+            const pathname = audioFile.pathname
+            const exportedFilename = pathname.substring(1, pathname.length)
+
+            exportedUrls.push(exportedFilename)
+        });
+
+        engine.loadAudio(exportedUrls, audioSprites.sprite, () => {
+            game.create(destinationTileSize);
+            //createFramerateCounter(htmlContainer);
+            // if (isTouchScreen) {
+            //     setupOnScreenControls()
+            // }
+            setInterval(update, 1000.0 / engine.fpsMax);
+
+            render();
+        });
     });
 }
 
