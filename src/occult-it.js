@@ -42,12 +42,15 @@ export class OccultIt {
         }
 
         this.gameContainer.addChild(state.console.sprite)
+        this.gameContainer.addChild(state.console.progressBar)
     }
 
     update(timeDelta) {
         for (let player of state.players) {
             player.update(timeDelta, this.gameContainer)
         }
+
+        state.console.update()
 
         if (Math.random() < 0.1) {
             // Break a random pipe
