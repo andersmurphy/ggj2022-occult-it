@@ -24,7 +24,7 @@ export class OccultIt {
     }
 
     create(destinationTileSize) {
-        state.pipes = makePipes()
+        state.tiles = makePipes()
         renderState.pipes = Array(pipesGridWidth).fill(null).map(
             () => Array(pipesGridHeight).fill(null).map(() => ({pipeSprite: null, breakSprite: null})))
         //debugPipes()
@@ -53,7 +53,7 @@ export class OccultIt {
             // Break a random pipe
             const breakPos = new Vector2(Math.random() * (pipesGridWidth - 1), Math.random() * (pipesGridHeight - 1))
             breakPos.set(Math.floor(breakPos.x), Math.floor(breakPos.y))
-            const pipeToBreak = state.pipes[breakPos.x][breakPos.y]
+            const pipeToBreak = state.tiles[breakPos.x][breakPos.y]
             if (pipeToBreak.type === Type.pipe) {
                 breakPipe(breakPos, this.gameContainer)
             }

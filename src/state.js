@@ -1,5 +1,5 @@
 export default {
-    pipes: null,
+    tiles: null,
     players: []
 }
 

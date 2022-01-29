@@ -77,14 +77,17 @@ export class Player {
             }
 
             const collisionPoint = new Vector2(Math.floor(nextPos.x), Math.floor(nextPos.y))
-            let tile = state.pipes[collisionPoint.x][collisionPoint.y]
+            const tile = state.tiles[collisionPoint.x][collisionPoint.y]
+
             if (tile.type !== Type.empty) {
                 if (tile.type == Type.pipe) {
                     this.startInteracting(tile, collisionPoint)
                 } else if (this.isInteracting()) {
                     this.stopInteracting()
                 }
-                return
+                if (!tile.pipe.isBroken) {
+                    return
+                }
             } else if (this.isInteracting()) {
                 this.stopInteracting()
             }
@@ -113,7 +116,7 @@ export class Player {
             tries--
 
             const spawnPos = new Vector2(Math.random() * (pipesGridWidth - 1), Math.random() * (pipesGridHeight - 1))
-            if (state.pipes[Math.floor(spawnPos.x)][Math.floor(spawnPos.y)].type === Type.empty) {
+            if (state.tiles[Math.floor(spawnPos.x)][Math.floor(spawnPos.y)].type === Type.empty) {
                 return new Player(spawnPos, true, container)
             }
         }
@@ -152,9 +155,9 @@ export class Player {
         if (this.interacting
             && this.interacting.tile.type == Type.pipe
             && !this.interacting.tile.pipe.isBroken) {
-                this.interacting.tile.pipe.isBroken = true
                 const point = this.interacting.point
                 breakPipe(point, container)
+                this.stopInteracting()
         }
     }
 }

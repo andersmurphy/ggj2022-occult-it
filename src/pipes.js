@@ -278,7 +278,7 @@ export function debugPipes() {
     let pre = document.createElement('pre')
     for (let y = 0; y < pipesGridHeight; y++) {
         for (let x = 0; x < pipesGridWidth; x++) {
-            const tile = state.pipes[x][y]
+            const tile = state.tiles[x][y]
 
             if (tile.type === Type.empty) pre.append(' ')
             else if (tile.type === Type.pipe) {
@@ -301,7 +301,7 @@ export function debugPipes() {
 export function addPipes(container) {
     for (let y = 0; y < pipesGridHeight; y++) {
         for (let x = 0; x < pipesGridWidth; x++) {
-            const tile = state.pipes[x][y]
+            const tile = state.tiles[x][y]
             let sprite = undefined
 
             if (tile.type === Type.empty) { 
@@ -330,9 +330,9 @@ export function addPipes(container) {
 
 export function breakPipe(point, container) {
     const sprite = PIXI.Sprite.from('BrokenPipeOverlay.png')
-
-    console.log(sprite)
     renderState.pipes[point.x][point.y].breakSprite = sprite
+
+    state.tiles[point.x][point.y].pipe.isBroken = true
 
     container.addChild(sprite)
     sprite.x = point.x
