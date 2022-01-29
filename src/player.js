@@ -8,6 +8,8 @@ const texture = require('../assets/Player.png')
 const speed = 0.3 // In tiles per frame
 
 export class Player {
+    interactingTile
+
     constructor(pos, isLocal) {
         this.pos = pos
         this.vel = new Vector2()
@@ -69,7 +71,14 @@ export class Player {
 
             let tile = state.pipes[Math.floor(nextPos.x)][Math.floor(nextPos.y)]
             if (tile.type !== Type.empty) {
+                if (tile.type == Type.pipe) {
+                    this.startInteracting(tile)
+                } else if (this.isInteracting()) {
+                    this.stopInteracting()
+                }
                 return
+            } else if (this.isInteracting()) {
+                this.stopInteracting()
             }
             
             this.pos = nextPos
@@ -91,5 +100,22 @@ export class Player {
 
     static addAssets(loader) {
         loader.add('player.png', texture)
+    }
+
+    startInteracting(tile) {
+        if (this.interactingTile) {
+            this.stopInteracting()
+        }
+        this.interactingTile = tile
+        this.interactingTile.sprite.tint = 0xff00ff
+    }
+
+    isInteracting() {
+        return this.interactingTile && !(this.vel.x == 0 && this.vel.y == 0)
+    }
+
+    stopInteracting() {
+        this.interactingTile.sprite.tint = 0xffffff
+        this.interactingTile = undefined
     }
 }
