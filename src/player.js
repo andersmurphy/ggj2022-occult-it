@@ -312,6 +312,7 @@ export class Player {
 
         this.fixing.time += timeDelta
         if (this.fixing.time >= fixDuration) {
+            this.audio.play("fix4")
             this.finishFixPipe(container)
         } else {
             const newQuarter = Math.floor(this.fixing.time / quarterDuration)
@@ -323,6 +324,9 @@ export class Player {
                 container.removeChild(this.fixing.sprite)
                 this.fixing.sprite = sprite
                 container.addChild(sprite)
+
+                const audioName = `fix${newQuarter}`
+                this.audio.play(audioName)
             }
         }
     }
