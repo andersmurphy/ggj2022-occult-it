@@ -142,12 +142,8 @@ export function makePipes() {
                 continue
             }
 
-            const nextPipe = pipes[next.x][next.y]
-
-
-            if (nextPipe.type === Type.goal) {
-                break
-            }
+            let nextPipe = pipes[next.x][next.y]
+            const currentPipe = pipes[current.x][current.y]
 
             let inPath = false
             for (let p of path) {
@@ -158,8 +154,15 @@ export function makePipes() {
             if (inPath) continue
 
             if (nextPipe.type === Type.pipe) {
-                // There's an existin pipe here, see if we can bridge it
-                if (nextPipe.pipe.dir === PipeDir.upDown) {
+                if (nextPipe.pipe.dir !== PipeDir.upDown && nextPipe.dir !== PipeDir.leftRight) {
+                    xFirst != xFirst
+                    continue
+                }
+
+                let failed = false
+
+                // There's an existing pipe here, see if we can bridge it
+                while (nextPipe.type === Type.pipe && nextPipe.pipe.dir === PipeDir.upDown) {
                     if (next.x > current.x && current.x > 1) {
                         path.push(next.clone())
                         next.x++
@@ -167,9 +170,19 @@ export function makePipes() {
                         path.push(next.clone())
                         next.x--
                     } else {
-                        continue
+                        failed = true
+                        break
                     }
-                } else if (nextPipe.pipe.dir === PipeDir.leftRight) {
+                    if (next.x < 0 || next.x >= pipesGridWidth || next.y < 0 || next.y >= pipesGridHeight) {
+                        failed = true
+                        break
+                    }
+                    nextPipe = pipes[next.x][next.y]
+                }
+
+                if (failed) continue
+                
+                while (nextPipe.type === Type.pipe && nextPipe.pipe.dir === PipeDir.leftRight) {
                     if (next.y > current.y && current.y > 1) {
                         path.push(next.clone())
                         next.y++
@@ -177,12 +190,22 @@ export function makePipes() {
                         path.push(next.clone())
                         next.y--
                     } else {
-                        continue
+                        failed = true
+                        break
                     }
-                } else {
-                    xFirst = !xFirst
-                    continue
+                    if (next.x < 0 || next.x >= pipesGridWidth || next.y < 0 || next.y >= pipesGridHeight) {
+                        failed = true
+                        break
+                    }
+                    nextPipe = pipes[next.x][next.y]
                 }
+
+                if (failed) continue
+            }
+
+            if (nextPipe.type === Type.goal) {
+                path.push(next.clone())
+                break
             }
 
             current = next
@@ -202,7 +225,7 @@ export function makePipes() {
                     // Make a bridge if possible
                     tile.pipe.dir = PipeDir.bridge
                     tile.pipe.ids = [tile.pipe.id, i]
-                } else {
+                } else if (tile.type === Type.empty) {
                     tile.type = Type.pipe
                     tile.pipe = {ids: [i]}
 
@@ -245,7 +268,6 @@ export function makePipes() {
                 }
             }
         }
-
     }
     return pipes
 }
@@ -280,8 +302,8 @@ export function addPipes(container) {
             const tile = state.pipes[x][y]
             let sprite = undefined
 
-            if (tile.type === Type.empty) { }
-            else if (tile.type === Type.pipe) {
+            if (tile.type === Type.empty) { 
+            } else if (tile.type === Type.pipe) {
                 if (tile.pipe.dir === PipeDir.leftRight) sprite = PIXI.Sprite.from('PipeEW.png')
                 else if (tile.pipe.dir === PipeDir.upDown) sprite = PIXI.Sprite.from('PipeNS.png')
                 else if (tile.pipe.dir === PipeDir.leftUp) sprite = PIXI.Sprite.from('PipeNW.png')
