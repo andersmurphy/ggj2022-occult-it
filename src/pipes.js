@@ -58,13 +58,13 @@ export function makePipes() {
             xFirst = true
         }
 
-        const maxTries = 200
+        const maxTries = 400
         let tries = maxTries
 
         if (pipes[start.x][start.y].type !== Type.empty) {
             // If we start on top of an existing pipe, immediately fail
             tries = 0
-            break
+            continue
         }
  
         const path = [start]
@@ -122,7 +122,10 @@ export function makePipes() {
                 continue
             }
 
-            if (pipes[next.x][next.y].type === Type.goal) {
+            const nextPipe = pipes[next.x][next.y]
+
+
+            if (nextPipe.type === Type.goal) {
                 break
             }
 
@@ -132,15 +135,34 @@ export function makePipes() {
                     inPath = true
                 }
             }
+            if (inPath) continue
 
-            if (inPath) {
-                continue
-            }
-
-
-            if (pipes[next.x][next.y].type !== Type.empty) {
-                xFirst = !xFirst
-                continue
+            if (nextPipe.type === Type.pipe) {
+                // There's an existin pipe here, see if we can bridge it
+                if (nextPipe.pipe.dir === PipeDir.upDown) {
+                    if (next.x > current.x && current.x > 1) {
+                        path.push(next.clone())
+                        next.x++
+                    } else if (next.x < current.x && current.x < width - 2) {
+                        path.push(next.clone())
+                        next.x--
+                    } else {
+                        continue
+                    }
+                } else if (nextPipe.pipe.dir === PipeDir.leftRight) {
+                    if (next.y > current.y && current.y > 1) {
+                        path.push(next.clone())
+                        next.y++
+                    } else if (next.y < current.y && current.y < height - 2) {
+                        path.push(next.clone())
+                        next.y--
+                    } else {
+                        continue
+                    }
+                } else {
+                    xFirst = !xFirst
+                    continue
+                }
             }
 
             current = next
@@ -222,6 +244,7 @@ export function debugPipes() {
                 else if (tile.pipe.dir === PipeDir.leftDown) pre.append('╗')
                 else if (tile.pipe.dir === PipeDir.upRight) pre.append('╚')
                 else if (tile.pipe.dir === PipeDir.rightDown) pre.append('╔')
+                else if (tile.pipe.dir === PipeDir.bridge) pre.append('╬')
                 else pre.append('+')
             }
             else if (tile.type === Type.goal) pre.append('*')
