@@ -43,7 +43,7 @@ export class Player {
         dKey.press = () =>  this.right = true
         dKey.release = () => this.right = false
 
-        const rKey = keyboard(['r', 'R'])
+        const rKey = keyboard(['r', 'R', ' '])
         rKey.press = () => this.attemptToBreak(container)
     }
 
@@ -85,7 +85,7 @@ export class Player {
                 } else if (this.isInteracting()) {
                     this.stopInteracting()
                 }
-                if (!tile.pipe.isBroken) {
+                if (tile.type == Type.pipe && !tile.pipe.isBroken) {
                     return
                 }
             } else if (this.isInteracting()) {
