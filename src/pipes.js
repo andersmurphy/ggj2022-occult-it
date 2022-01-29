@@ -30,7 +30,7 @@ export function makePipes() {
         () => Array(height).fill(null).map(() => ({type: Type.empty, pipe: null}))
     )
 
-    const numPipes = 10
+    const numPipes = 30
     
     const goal = new Vector2(Math.floor(width / 2), Math.floor(height / 2))
     
@@ -184,16 +184,16 @@ export function makePipes() {
                         // Get direction for edge pipes
                         if (current.x === 0) {
                             if (next.x > current.x)      tile.pipe.dir = PipeDir.leftRight
-                            else if (next.y > current.y) tile.pipe.dir = PipeDir.leftUp
-                            else if (next.y < current.y) tile.pipe.dir = PipeDir.leftDown
+                            else if (next.y > current.y) tile.pipe.dir = PipeDir.leftDown
+                            else if (next.y < current.y) tile.pipe.dir = PipeDir.leftUp
                         } else if (current.x === width - 1) {
                             if (next.x < current.x)      tile.pipe.dir = PipeDir.leftRight
-                            else if (next.y > current.y) tile.pipe.dir = PipeDir.upRight
-                            else if (next.y < current.y) tile.pipe.dir = PipeDir.rightDown
+                            else if (next.y > current.y) tile.pipe.dir = PipeDir.rightDown
+                            else if (next.y < current.y) tile.pipe.dir = PipeDir.upRight
                         } else if (current.y === 0) {
                             if (next.x < current.x)      tile.pipe.dir = PipeDir.leftUp
                             else if (next.x > current.x) tile.pipe.dir = PipeDir.upRight
-                            else if (next.y < current.y) tile.pipe.dir = PipeDir.upDown
+                            else if (next.y > current.y) tile.pipe.dir = PipeDir.upDown
                         } else if (current.y === height - 1) {
                             if (next.x < current.x)      tile.pipe.dir = PipeDir.leftDown
                             else if (next.x > current.x) tile.pipe.dir = PipeDir.rightDown
