@@ -26,7 +26,7 @@ export class OccultIt {
     create(destinationTileSize) {
         state.pipes = makePipes()
         //debugPipes()
-        state.players.push(new Player(new Vector2(pipesGridWidth / 2, pipesGridHeight / 2 + 5), true))
+        state.players.push(Player.spawn())
         state.console = new Console(new Vector2(pipesGridWidth /2 - 1, pipesGridHeight / 2 - 1))
 
         this.gameContainer = this.engine.makeContainer()
