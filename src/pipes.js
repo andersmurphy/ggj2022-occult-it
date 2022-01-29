@@ -13,14 +13,6 @@ const PipeNW = require('../images/PipeNW.png')
 const PipeSE = require('../images/PipeSE.png')
 const PipeSW = require('../images/PipeSW.png')
 
-let spritePipeNS 
-let spritePipeEW 
-let spritePipeNE 
-let spritePipeNSEW
-let spritePipeNW 
-let spritePipeSE 
-let spritePipeSW 
-
 // Tile types
 export class Type {
     static empty = new Type('empty')
@@ -51,16 +43,6 @@ export function addPipeAssets(loader) {
     loader.add('PipeNW.png', PipeNW)
     loader.add('PipeSE.png', PipeSE)
     loader.add('PipeSW.png', PipeSW)
-}
-
-export function loadPipeSprites() {
-    spritePipeNS = PIXI.Sprite.from('PipeNS.png')
-    spritePipeEW = PIXI.Sprite.from('PipeEW.png')
-    spritePipeNE = PIXI.Sprite.from('PipeNE.png')
-    spritePipeNSEW = PIXI.Sprite.from('PipeNSEW.png')
-    spritePipeNW = PIXI.Sprite.from('PipeNW.png')
-    spritePipeSE = PIXI.Sprite.from('PipeSE.png')
-    spritePipeSW = PIXI.Sprite.from('PipeSW.png')
 }
 
 export function makePipes() {
@@ -312,16 +294,10 @@ export function addPipes(container) {
             else if (tile.type === Type.goal) { /* pre.append('*') */ }
 
             if (sprite) {
-                const xx = x* 11
-                const yy = y* 11
-
-                console.log(xx)
                 container.addChild(sprite)
-                sprite.x = xx
-                sprite.y = yy
-                sprite.width = 11
-                sprite.height = 11
-                console.log(sprite.anchor)
+                sprite.x = x
+                sprite.y = y
+                sprite.scale.set(1 / 80, 1 / 80)
             }
         }
     }
