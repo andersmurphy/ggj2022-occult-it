@@ -12,6 +12,7 @@ const PipeNSEW = require('../images/PipeNSEW.png')
 const PipeNW = require('../images/PipeNW.png')
 const PipeSE = require('../images/PipeSE.png')
 const PipeSW = require('../images/PipeSW.png')
+//const BrokenPipeOverlay = require('../images/BrokenPipeOverlay.png')
 
 // Tile types
 export class Type {

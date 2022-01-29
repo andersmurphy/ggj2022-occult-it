@@ -38,6 +38,9 @@ export class Player {
         const dKey = keyboard(['d', 'D', 'ArrowRight'])
         dKey.press = () =>  this.right = true
         dKey.release = () => this.right = false
+
+        const rKey = keyboard(['r', 'R'])
+        rKey.press = this.attemptToBreak
     }
 
     update() {
@@ -117,5 +120,14 @@ export class Player {
     stopInteracting() {
         this.interactingTile.sprite.tint = 0xffffff
         this.interactingTile = undefined
+    }
+
+    attemptToBreak() {
+        if (this.interactingTile
+            && this.interactingTile.type == Type.pipe
+            && !this.interactingTile.pipe.isBroken) {
+                this.interactingTile.pipe.isBroken = true
+                //this.interactingTile.pipe.brokenSprite = 
+        }
     }
 }
