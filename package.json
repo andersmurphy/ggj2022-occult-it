@@ -4,11 +4,11 @@
     "start": "parcel",
     "build": "parcel build"
   },
-   "targets": {
+  "targets": {
     "default": {
       "distDir": "./docs"
     }
-   },
+  },
   "devDependencies": {
     "parcel": "^2.2.1"
   }
