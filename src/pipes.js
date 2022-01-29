@@ -1,14 +1,40 @@
 import {Vector2} from './vector2.js'
 
+// Tile types
+export class Tile {
+    static empty = new Tile('empty')
+    static pipe = new Tile('pipe')
+    static goal = new Tile('goal')
+
+    constructor(name) {
+        this.name = name
+    }
+}
+
+// Pipe directions
+export class PipeDir {
+    static leftRight = 0
+    static leftUp = 1
+    static leftDown = 2
+    static upDown = 2
+    static upLeft = 3
+    static upRight = 4
+    static rightUp = 5
+    static rightDown = 6
+    static downLeft = 7
+    static downRight = 8
+    static bridge = 9
+}
+
+
 export function makePipes() {
     const width = 64
     const height = 40
     
     const pipes = Array(width).fill(null).map(
-        () => Array(height).fill(null).map(() => ({tile: ' '}))
+        () => Array(height).fill(null).map(() => ({tile: Tile.empty, pipe: null}))
     )
-    console.log(pipes)
-    
+
     const numPipes = 10
     
     const goal = new Vector2(Math.floor(width / 2), Math.floor(height / 2))
@@ -40,8 +66,8 @@ export function makePipes() {
         const maxTries = 200
         let tries = maxTries
 
-        if (pipes[start.x][start.y].tile !== ' ') {
-            // Immediately fail
+        if (pipes[start.x][start.y].tile !== Tile.empty) {
+            // If we start on top of an existing pipe, immediately fail
             tries = 0
             break
         }
@@ -52,7 +78,7 @@ export function makePipes() {
 
         for (let x = goal.x - 1; x <= goal.x + 1; x++) {
             for (let y = goal.y - 1; y <= goal.y + 1; y++) {
-                pipes[x][y].tile = '*'
+                pipes[x][y].tile = Tile.goal
             }
         }
 
@@ -61,6 +87,7 @@ export function makePipes() {
             next = current.clone()
 
             if (Math.random() < 0.05) {
+                // Occasionally randomly swap direction
                 xFirst = !xFirst
             }
 
@@ -100,7 +127,7 @@ export function makePipes() {
                 continue
             }
 
-            if (pipes[next.x][next.y].tile === '*') {
+            if (pipes[next.x][next.y].tile === Tile.goal) {
                 break
             }
 
@@ -116,7 +143,7 @@ export function makePipes() {
             }
 
 
-            if (pipes[next.x][next.y].tile !== ' ') {
+            if (pipes[next.x][next.y].tile !== Tile.empty) {
                 xFirst = !xFirst
                 continue
             }
@@ -129,9 +156,10 @@ export function makePipes() {
         if (tries > 0) {
             for (let pathElement of path) {
                 if (pipes[pathElement.x][pathElement.y].tile === `${i}`) {
-                    pipes[pathElement.x][pathElement.y].tile === '+'
+                    pipes[pathElement.x][pathElement.y].tile = Tile.pipe
                 } else {
-                    pipes[pathElement.x][pathElement.y].tile = `${i}`
+                    pipes[pathElement.x][pathElement.y].tile = Tile.pipe
+                    pipes[pathElement.x][pathElement.y].pipe = {dir: PipeDir.upDown, id: i}  // TODO: Calculate direction properly
                 }
             }
         }
@@ -140,3 +168,17 @@ export function makePipes() {
     return pipes
 }
 
+export function debugPipes() {
+    let pre = document.createElement('pre')
+    for (let y = 0; y < 40; y++) {
+        for (let x = 0; x < 64; x++) {
+            const tile = pipes[x][y].tile
+
+            if (tile === Tile.empty) pre.append(' ')
+            else if (tile === Tile.pipe) pre.append('#')
+            else if (tile === Tile.goal) pre.append('*')
+        }
+        pre.append('\n')
+    }
+    document.body.append(pre)
+}
