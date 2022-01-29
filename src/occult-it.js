@@ -1,7 +1,6 @@
 export class OccultIt {
     engine
     gameContainer
-    pipe
 
     constructor(engine) {
         this.engine = engine
@@ -9,16 +8,10 @@ export class OccultIt {
 
     create() {
         this.gameContainer = this.engine.makeContainer()
-        this.positionContainers()
 
     }
 
     update() {
         
-    }
-
-    positionContainers() {
-        this.gameContainer.x = 0;
-        this.gameContainer.y = 0;
     }
 }
