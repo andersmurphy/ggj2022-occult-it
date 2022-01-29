@@ -36,12 +36,11 @@ function load() {
 function setup() {
     const boardSize = calculateSize();
 
-
     engine = new PixiEngine({
         containerId: gameContainerId,
         canvasW: boardSize.width,
         canvasH: boardSize.height,
-        fpsMax: 10,
+        fpsMax: 60,
         isTouchScreen
     })
     game = new OccultIt(engine)
@@ -122,7 +121,7 @@ function create() {
 
     loader.load((loader, resources) => {
         //engine.loadAudio(audioSprites.urls, audioSprites.sprite, () => {
-        game.create();
+        game.create(destinationTileSize);
         //createFramerateCounter(htmlContainer);
         // if (isTouchScreen) {
         //     setupOnScreenControls()
