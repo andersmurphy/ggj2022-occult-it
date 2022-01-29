@@ -50,7 +50,7 @@ export function addPipeAssets(loader) {
 
 export function makePipes() {
     const pipes = Array(pipesGridWidth).fill(null).map(
-        () => Array(pipesGridHeight).fill(null).map(() => ({type: Type.empty, pipe: null, flooding: 0}))
+        () => Array(pipesGridHeight).fill(null).map(() => ({type: Type.empty, pipe: null, flooding: 0, evaporation: 0}))
     )
 
     const numPipes = 100
@@ -383,27 +383,34 @@ export function checkFlooding() {
     for (let x = 0; x < pipesGridWidth; x++) {
         for (let y = 0; y < pipesGridHeight; y++) {
             const tile = state.tiles[x][y]
-            if (tile.type === Type.pipe && tile.pipe.isBroken) {
-                tile.flooding = Math.min(tile.flooding + 1, maxFlooding)
+            if (tile.type === Type.pipe) {
+                if (tile.pipe.isBroken) {
+                    tile.flooding = Math.min(tile.flooding + 1, maxFlooding)
+                } else {
+                    tile.flooding = Math.max(tile.flooding - 1, 0)
+                }
             }
 
             if ((x > 1 && state.tiles[x-1][y].flooding >= maxFlooding) ||
                 (x < pipesGridWidth - 2 && state.tiles[x+1][y].flooding >= maxFlooding) ||
                 (y > 1 && state.tiles[x][y-1].flooding >= maxFlooding) ||
                 (y < pipesGridHeight - 2 && state.tiles[x][y+1].flooding >= maxFlooding)) {
+                    tile.evaporation = 20
                     if (tile.flooding < maxFlooding) {
                         if (Math.random() < floodChance) {
                             tile.flooding = Math.min(tile.flooding + 1, maxFlooding)
                             renderFlood(x, y, tile)
                         }
                     }
-            } else {
-                if (tile.flooding > 0) {
-                    if (Math.random() < floodChance) {
-                        tile.flooding--
-                        renderFlood(x, y, tile)
-                    }
                 }
+
+            tile.evaporation--
+
+            if (tile.flooding > 0 && tile.evaporation == 0) {
+                console.log('Evaporating')
+                tile.flooding--
+                tile.evaporation = 20
+                renderFlood(x, y, tile)
             }
         }
     }
