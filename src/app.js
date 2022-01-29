@@ -1,3 +1,4 @@
+import {makePipes, debugPipes} from './pipes.js'
 console.log('Hello world!')
 import * as PIXI from 'pixi.js'
 import { PixiEngine } from './pixi-engine.js'
@@ -20,6 +21,9 @@ let boardSize = { width: 0, height: 0 }
 let destinationTileSize = { width: 0, height: 0 }
 
 window.document.addEventListener('DOMContentLoaded', load)
+
+window.pipes = makePipes()
+debugPipes()
 
 function load() {
     // portraitControls.className = 'portrait-controls-container'
