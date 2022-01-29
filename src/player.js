@@ -7,7 +7,7 @@ import renderState from './render-state'
 
 const texture = require('../assets/Player.png')
 const brokenPipeOverlay = require('../images/BrokenPipeOverlay.png')
-const speed = 0.3 // In tiles per frame
+const speed = 0.2 // In tiles per frame
 
 export class Player {
     interacting
@@ -71,13 +71,16 @@ export class Player {
 
 
             // Check collisions with pipes/edge
-            if (nextPos.x < this.scale / 2 || nextPos.x > pipesGridWidth - this.scale / 2 || 
-                nextPos.y < this.scale / 2 || nextPos.y > pipesGridHeight - this.scale / 2 ) {
-                return
+            if (nextPos.x < this.scale / 2 || nextPos.x > pipesGridWidth - this.scale / 2) {
+                nextPos.x -= this.vel.x
             }
 
-            const collisionPoint = new Vector2(Math.floor(nextPos.x), Math.floor(nextPos.y))
-            const tile = state.tiles[collisionPoint.x][collisionPoint.y]
+            if (nextPos.y < this.scale / 2 || nextPos.y > pipesGridHeight - this.scale / 2 ) {
+                nextPos.y -= this.vel.y
+            }
+
+            let collisionPoint = new Vector2(Math.floor(nextPos.x), Math.floor(nextPos.y))
+            let tile = state.tiles[collisionPoint.x][collisionPoint.y]
 
             if (tile.type !== Type.empty) {
                 if (tile.type == Type.pipe) {
@@ -85,8 +88,21 @@ export class Player {
                 } else if (this.isInteracting()) {
                     this.stopInteracting()
                 }
-                if (tile.type == Type.pipe && !tile.pipe.isBroken) {
-                    return
+                if (tile.type !== Type.pipe || !tile.pipe.isBroken) {
+                    // Try without x motion
+                    nextPos.x -= this.vel.x
+                    collisionPoint = new Vector2(Math.floor(nextPos.x), Math.floor(nextPos.y))
+                    tile = state.tiles[collisionPoint.x][collisionPoint.y]
+                    if (tile.type !== Type.empty && (tile.type !== Type.pipe || !tile.pipe.isBroken)) {
+                        // Otherwise try without y motion
+                        nextPos.x += this.vel.x
+                        nextPos.y -= this.vel.y
+                        collisionPoint = new Vector2(Math.floor(nextPos.x), Math.floor(nextPos.y))
+                        tile = state.tiles[collisionPoint.x][collisionPoint.y]
+                        if (tile.type !== Type.empty && (tile.type !== Type.pipe || !tile.pipe.isBroken)) {
+                            return
+                        }
+                    }
                 }
             } else if (this.isInteracting()) {
                 this.stopInteracting()
@@ -108,6 +124,8 @@ export class Player {
             }
         }
     }
+
+    
 
     static spawn(container) {
         let tries = 1000
