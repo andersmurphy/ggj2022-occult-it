@@ -1,10 +1,9 @@
-import state from './state.js'
-import {makePipes, debugPipes, pipesGridWidth, pipesGridHeight} from './pipes.js'
 import * as PIXI from 'pixi.js'
 import { PixiEngine } from './pixi-engine.js'
 import { OccultIt } from './occult-it.js'
-import { Vector2 } from './vector2.js'
-import { Player } from './player.js'
+import { pipesGridWidth, pipesGridHeight } from './pipes.js'
+
+const spriteSheetPng = require('../images/spritesheet.png')
 
 //const audioSprites = require('../audio/output.json')
 
@@ -36,9 +35,7 @@ function load() {
 
 function setup() {
     const boardSize = calculateSize();
-    state.pipes = makePipes()
-    state.players.push(new Player(new Vector2(pipesGridWidth / 2, pipesGridHeight / 2 - 5)))
-    debugPipes()
+
 
     engine = new PixiEngine({
         containerId: gameContainerId,
@@ -120,18 +117,22 @@ function create() {
     // Promise.all([
     //     pixelFont.load(),
     // ]).then(function(_) {
-        engine.loadSpriteSheet(() => {
-            //engine.loadAudio(audioSprites.urls, audioSprites.sprite, () => {
-                game.create();
-                //createFramerateCounter(htmlContainer);
-                // if (isTouchScreen) {
-                //     setupOnScreenControls()
-                // }
-                setInterval(update, 1000.0 / engine.fpsMax);
-                render();
-            //})
-        });
-    // });
+    
+    const loader = game.loadAssets()
+
+    loader.load((loader, resources) => {
+        //engine.loadAudio(audioSprites.urls, audioSprites.sprite, () => {
+        game.create();
+        //createFramerateCounter(htmlContainer);
+        // if (isTouchScreen) {
+        //     setupOnScreenControls()
+        // }
+        setInterval(update, 1000.0 / engine.fpsMax);
+        
+        // let sheet = resources[spriteSheetJson].spritesheet;
+
+        render();
+    });
 }
 
 function handleResize() {
@@ -143,6 +144,7 @@ function update() {
 }
 
 function render() {
+
     requestAnimationFrame(render);
     engine.renderer.render(engine.stage);
     //fpsMeter.tick();

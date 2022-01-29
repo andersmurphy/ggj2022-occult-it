@@ -1,8 +1,11 @@
+import * as PIXI from 'pixi.js'
 import {Vector2} from './vector2.js'
 import state from './state.js'
 
 export const pipesGridWidth = 64
 export const pipesGridHeight = 40
+
+const PipeNS = require('../assets/PipeNS.png')
 
 // Tile types
 export class Type {
@@ -24,6 +27,10 @@ export class PipeDir {
     static upRight = 4
     static rightDown = 5
     static bridge = 6
+}
+
+export function addPipeAssets(loader) {
+    loader.add('PipeNS.png', PipeNS)
 }
 
 export function makePipes() {
