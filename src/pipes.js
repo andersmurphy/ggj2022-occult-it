@@ -361,25 +361,24 @@ export function fixPipe(point, container) {
     state.tiles[point.x][point.y].pipe.isBroken = false
 }
 
-const maxFlooding = 30
+const maxFlooding = 10
 
-function renderFlood(x, y, tile) {
+function renderFlood(x, y) {
+    const tile = state.tiles[x][y]
     const floodGraphic = renderState.pipes[x][y].floodGraphic
     floodGraphic.cacheAsBitmap = false
     floodGraphic.clear()
-    floodGraphic.beginFill(0x8888ee)
-    floodGraphic.drawRect(
-        25 - 25 * tile.flooding / maxFlooding, 25 - 25 * tile.flooding / maxFlooding,
-        50 * tile.flooding / maxFlooding, 50 * tile.flooding / maxFlooding, 4)
+    floodGraphic.beginFill(0x8888ee, tile.flooding / maxFlooding)
+    floodGraphic.drawRect(0, 0, 50, 50)
     floodGraphic.cacheAsBitmap = true
 }
 
 
 const floodChance = 0.01
-const evaporationTime = 10
+const evaporationTime = 3000
 
 export function checkFlooding() {
-    let updatesLeft = 5
+    let updatesLeft = 20
 
     for (let x = 0; x < pipesGridWidth; x++) {
         for (let y = 0; y < pipesGridHeight; y++) {
@@ -390,26 +389,52 @@ export function checkFlooding() {
             const tile = state.tiles[x][y]
             if (tile.type === Type.pipe) {
                 if (tile.pipe.isBroken) {
-                    tile.flooding = Math.min(tile.flooding + 1, maxFlooding + 1)
+                    tile.evaporation = evaporationTime
+                    if (tile.flooding < maxFlooding) {
+                        tile.flooding++
+                        renderFlood(x, y)
+                        updatesLeft--
+                    }
                 } else {
-                    tile.flooding = Math.max(tile.flooding - 1, 0)
+                    // tile.flooding = Math.max(tile.flooding - 1, 0)
                 }
             }
 
-            if ((x > 1 && state.tiles[x-1][y].flooding > tile.flooding) ||
-                (x < pipesGridWidth - 2 && state.tiles[x+1][y].flooding > tile.flooding) ||
-                (y > 1 && state.tiles[x][y-1].flooding > tile.flooding) ||
-                (y < pipesGridHeight - 2 && state.tiles[x][y+1].flooding > tile.flooding)) {
+            if (Math.random() < floodChance) {
+                if ((x > 0 && state.tiles[x-1][y].flooding > tile.flooding + 1)) {
+                    state.tiles[x-1][y].flooding -= 1
+                    tile.flooding += 1
                     tile.evaporation = evaporationTime
-                    if (tile.flooding < maxFlooding && Math.random() < floodChance) {
-                        tile.flooding = Math.min(tile.flooding + 1, maxFlooding)
-                        renderFlood(x, y, tile)
-                        updatesLeft--
-                    }
-            } else if ((x > 1 && state.tiles[x-1][y].flooding < tile.flooding) ||
-                       (x < pipesGridWidth - 2 && state.tiles[x+1][y].flooding < tile.flooding) ||
-                       (y > 1 && state.tiles[x][y-1].flooding < tile.flooding) ||
-                       (y < pipesGridHeight - 2 && state.tiles[x][y+1].flooding < tile.flooding)) {
+                    renderFlood(x, y)
+                    renderFlood(x-1, y, tile)
+                    updatesLeft--
+                } else if (x < pipesGridWidth - 1 && state.tiles[x+1][y].flooding > tile.flooding + 1) {
+                    state.tiles[x+1][y].flooding -= 1
+                    tile.flooding += 1
+                    tile.evaporation = evaporationTime
+                    renderFlood(x, y)
+                    renderFlood(x+1, y, tile)
+                    updatesLeft--
+                } else if (y > 0 && state.tiles[x][y-1].flooding > tile.flooding + 1) {
+                    state.tiles[x][y-1].flooding -= 1
+                    tile.flooding += 1
+                    tile.evaporation = evaporationTime
+                    renderFlood(x, y)
+                    renderFlood(x, y-1, tile)
+                    updatesLeft--
+                } else if (y < pipesGridHeight - 1 && state.tiles[x][y+1].flooding > tile.flooding + 1) {
+                    state.tiles[x][y+1].flooding -= 1
+                    tile.flooding += 1
+                    tile.evaporation = evaporationTime
+                    renderFlood(x, y)
+                    renderFlood(x, y+1, tile)
+                    updatesLeft--
+                }
+            }
+            if ((x > 0 && state.tiles[x-1][y].flooding <= tile.flooding) ||
+                       (x < pipesGridWidth - 1 && state.tiles[x+1][y].flooding <= tile.flooding) ||
+                       (y > 0 && state.tiles[x][y-1].flooding <= tile.flooding) ||
+                       (y < pipesGridHeight - 1 && state.tiles[x][y+1].flooding <= tile.flooding)) {
                 tile.evaporation--
                 if (tile.flooding > 0 && tile.evaporation == 0) {
                     tile.flooding--
