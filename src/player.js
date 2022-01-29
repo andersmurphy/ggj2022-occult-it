@@ -157,17 +157,6 @@ export class Player {
         rayEnd.x += normal.x
         rayEnd.y += normal.y
 
-        // Check collisions with pipes/edge
-        if (rayEnd.x < this.scale / 2 || rayEnd.x > pipesGridWidth - this.scale / 2) {
-            this.stopInteracting()
-            return
-        }
-
-        if (rayEnd.y < this.scale / 2 || rayEnd.y > pipesGridHeight - this.scale / 2 ) {
-            this.stopInteracting()
-            return
-        }
-
         let interactionPoint = new Vector2(Math.floor(rayEnd.x), Math.floor(rayEnd.y))
         let tile = state.tiles[interactionPoint.x][interactionPoint.y]
 
