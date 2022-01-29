@@ -145,6 +145,7 @@ function update() {
 function render() {
 
     requestAnimationFrame(render);
+    engine.renderer.backgroundColor = 0xC4C4C4
     engine.renderer.render(engine.stage);
     //fpsMeter.tick();
 }

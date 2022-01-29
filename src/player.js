@@ -106,6 +106,20 @@ export class Player {
         }
     }
 
+    static spawn(container) {
+        let tries = 1000
+
+        while (tries > 0) {
+            tries--
+
+            const spawnPos = new Vector2(Math.random() * (pipesGridWidth - 1), Math.random() * (pipesGridHeight - 1))
+            if (state.pipes[Math.floor(spawnPos.x)][Math.floor(spawnPos.y)].type === Type.empty) {
+                console.log(spawnPos)
+                return new Player(spawnPos, true, container)
+            }
+        }
+    }
+
     static addAssets(loader) {
         loader.add('player.png', texture)
         loader.add('BrokenPipeOverlay.png', brokenPipeOverlay)
@@ -150,8 +164,6 @@ export class Player {
                 sprite.x = this.interacting.point.x
                 sprite.y = this.interacting.point.y
                 sprite.scale.set(1 / 80, 1 / 80)
-
-                //this.interactingTile.pipe.brokenSprite = 
         }
     }
 }
