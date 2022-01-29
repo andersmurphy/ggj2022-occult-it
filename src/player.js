@@ -88,6 +88,8 @@ export class Player {
             this.vel.x += speed
         }
 
+        this.updateInteracting()
+
         const nextPos = this.pos.clone()
 
         nextPos.x += this.vel.x
@@ -106,11 +108,6 @@ export class Player {
         let tile = state.tiles[collisionPoint.x][collisionPoint.y]
 
         if (tile.type !== Type.empty) {
-            if (tile.type == Type.pipe) {
-                this.startInteracting(tile, collisionPoint)
-            } else if (this.isInteracting()) {
-                this.stopInteracting()
-            }
             if (tile.type !== Type.pipe || !tile.pipe.isBroken) {
                 // Try without x motion
                 nextPos.x -= this.vel.x
@@ -127,8 +124,6 @@ export class Player {
                     }
                 }
             }
-        } else if (this.isInteracting()) {
-            this.stopInteracting()
         }
         if (tile.type == Type.pipe && !tile.pipe.isBroken) {
             return
@@ -147,6 +142,41 @@ export class Player {
             } else {
                 this.sprite.rotation = (this.sprite.rotation + Math.PI * 2 + targetRotation) / 2
             }
+        }
+    }
+
+    updateInteracting() {
+        if (this.vel.x == 0 && this.vel.y == 0) {
+            return
+        }
+        const rayEnd = this.pos.clone()
+        const normal = this.vel.normalize()
+
+        rayEnd.x += normal.x
+        rayEnd.y += normal.y
+
+        // Check collisions with pipes/edge
+        if (rayEnd.x < this.scale / 2 || rayEnd.x > pipesGridWidth - this.scale / 2) {
+            this.stopInteracting()
+            return
+        }
+
+        if (rayEnd.y < this.scale / 2 || rayEnd.y > pipesGridHeight - this.scale / 2 ) {
+            this.stopInteracting()
+            return
+        }
+
+        let interactionPoint = new Vector2(Math.floor(rayEnd.x), Math.floor(rayEnd.y))
+        let tile = state.tiles[interactionPoint.x][interactionPoint.y]
+
+        if (tile.type !== Type.empty) {
+            if (tile.type == Type.pipe) {
+                this.startInteracting(tile, interactionPoint)
+            } else if (this.isInteracting()) {
+                this.stopInteracting()
+            }
+        } else if (this.isInteracting()) {
+            this.stopInteracting()
         }
     }
 
