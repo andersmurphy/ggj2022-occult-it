@@ -7,9 +7,9 @@ const spriteSheetPng = require('../images/spritesheet.png')
 
 //const audioSprites = require('../audio/output.json')
 
-PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
-PIXI.settings.ROUND_PIXELS = true
-PIXI.settings.RENDER_OPTIONS.antialias = false
+PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR
+PIXI.settings.ROUND_PIXELS = false
+PIXI.settings.RENDER_OPTIONS.antialias = true
 
 const gameContainerId = 'game'
 
