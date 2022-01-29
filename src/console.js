@@ -5,6 +5,7 @@ export class Console {
     constructor(pos) {
         this.pos = pos
         this.progress = 0
+        this.progressRate = 0.0002
 
         this.sprite = new PIXI.Sprite.from('Console.png')
         this.sprite.anchor.set(0, 0)
@@ -16,7 +17,7 @@ export class Console {
     }
 
     update() {
-        this.progress = Math.min(this.progress + 0.001, 1)
+        this.progress = Math.min(this.progress + this.progressRate, 1)
         this.progressBar.clear()
         this.progressBar.lineStyle(0.4, 0x55ff55, 0.7)
         this.progressBar.arc(1.5, 1.5, 1, 0, Math.PI * 2 * this.progress);
