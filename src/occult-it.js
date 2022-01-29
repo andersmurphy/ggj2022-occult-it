@@ -23,7 +23,7 @@ export class OccultIt {
 
     create() {
         state.pipes = makePipes()
-        state.players.push(new Player(new Vector2(pipesGridWidth / 2, pipesGridHeight / 2 - 5)))
+        state.players.push(new Player(new Vector2(0, 0), true))
         debugPipes()
         this.gameContainer = this.engine.makeContainer()
         this.engine.stage.addChild(this.gameContainer)
@@ -34,5 +34,8 @@ export class OccultIt {
     }
 
     update() {
+        for (let player of state.players) {
+            player.update()
+        }
     }
 }
