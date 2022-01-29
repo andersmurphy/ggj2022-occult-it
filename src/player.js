@@ -6,17 +6,25 @@ import state from './state'
 import renderState from './render-state'
 
 const texture = require('../assets/Player.png')
-const brokenPipeOverlay = require('../images/BrokenPipeOverlay.png')
+const timerSprites = [
+    require('../images/Timer0.png'),
+    require('../images/Timer1.png'),
+    require('../images/Timer2.png'),
+    require('../images/Timer3.png'),
+    require('../images/Timer4.png'),
+] 
 const speed = 0.3 // In tiles per frame
+const breakDuration = 1200  // milliseconds
 
 export class Player {
     interacting
+    breaking
 
     constructor(pos, isLocal, container) {
         this.pos = pos
         this.vel = new Vector2()
         this.isLocal = isLocal
-        this.sprite = new PIXI.Sprite.from('player.png')
+        this.sprite = PIXI.Sprite.from('player.png')
         this.sprite.anchor.set(0.5, 0.5)
         this.scale = 2
         this.sprite.scale.set(this.scale / 64, this.scale / 64) // Scale the player to be ~2 tiles wide
@@ -24,8 +32,8 @@ export class Player {
         this.down = false
         this.left = false
         this.right = false
-
         this.interacting = null
+        this.breaking = null
 
         const wKey = keyboard(['w', 'W', 'ArrowUp'])
         wKey.press = () =>  this.up = true
@@ -47,64 +55,93 @@ export class Player {
         rKey.press = () => this.attemptToBreak(container)
     }
 
-    update() {
+    update(timeDelta, container) {
         if (this.isLocal) {
-
-            this.vel.set(0, 0)
-            if (this.up) {
-                this.vel.y -= speed
+            if (this.breaking) {
+                this.updateBreaking(timeDelta, container)
+            } else {
+                this.updateInput()
             }
-            if (this.down) {
-                this.vel.y += speed
-            }
-            if (this.left) {
-                this.vel.x -= speed
-            }
-            if (this.right) {
-                this.vel.x += speed
-            }
+        }
+    }
 
-            const nextPos = this.pos.clone()
+    updateInput() {
+        this.vel.set(0, 0)
+        if (this.up) {
+            this.vel.y -= speed
+        }
+        if (this.down) {
+            this.vel.y += speed
+        }
+        if (this.left) {
+            this.vel.x -= speed
+        }
+        if (this.right) {
+            this.vel.x += speed
+        }
 
-            nextPos.x += this.vel.x
-            nextPos.y += this.vel.y
+        const nextPos = this.pos.clone()
+
+        nextPos.x += this.vel.x
+        nextPos.y += this.vel.y
 
 
-            // Check collisions with pipes/edge
-            if (nextPos.x < this.scale / 2 || nextPos.x > pipesGridWidth - this.scale / 2 || 
-                nextPos.y < this.scale / 2 || nextPos.y > pipesGridHeight - this.scale / 2 ) {
-                return
-            }
+        // Check collisions with pipes/edge
+        if (nextPos.x < this.scale / 2 || nextPos.x > pipesGridWidth - this.scale / 2 || 
+            nextPos.y < this.scale / 2 || nextPos.y > pipesGridHeight - this.scale / 2 ) {
+            return
+        }
 
-            const collisionPoint = new Vector2(Math.floor(nextPos.x), Math.floor(nextPos.y))
-            const tile = state.tiles[collisionPoint.x][collisionPoint.y]
+        const collisionPoint = new Vector2(Math.floor(nextPos.x), Math.floor(nextPos.y))
+        const tile = state.tiles[collisionPoint.x][collisionPoint.y]
 
-            if (tile.type !== Type.empty) {
-                if (tile.type == Type.pipe) {
-                    this.startInteracting(tile, collisionPoint)
-                } else if (this.isInteracting()) {
-                    this.stopInteracting()
-                }
-                if (tile.type == Type.pipe && !tile.pipe.isBroken) {
-                    return
-                }
+        if (tile.type !== Type.empty) {
+            if (tile.type == Type.pipe) {
+                this.startInteracting(tile, collisionPoint)
             } else if (this.isInteracting()) {
                 this.stopInteracting()
             }
-            
-            this.pos = nextPos
+            if (tile.type == Type.pipe && !tile.pipe.isBroken) {
+                return
+            }
+        } else if (this.isInteracting()) {
+            this.stopInteracting()
+        }
+        
+        this.pos = nextPos
 
-            // Update sprite 
-            this.sprite.position.set(this.pos.x, this.pos.y)
+        // Update sprite 
+        this.sprite.position.set(this.pos.x, this.pos.y)
 
-            if (this.vel.magnitudeSqr() > 0.001) {
-                const targetRotation = Math.atan2(this.vel.x, -this.vel.y)
+        if (this.vel.magnitudeSqr() > 0.001) {
+            const targetRotation = Math.atan2(this.vel.x, -this.vel.y)
 
-                if (Math.abs(this.sprite.rotation - targetRotation) < Math.PI) {
-                    this.sprite.rotation = (this.sprite.rotation + targetRotation) / 2
-                } else {
-                    this.sprite.rotation = (this.sprite.rotation + Math.PI * 2 + targetRotation) / 2
-                }
+            if (Math.abs(this.sprite.rotation - targetRotation) < Math.PI) {
+                this.sprite.rotation = (this.sprite.rotation + targetRotation) / 2
+            } else {
+                this.sprite.rotation = (this.sprite.rotation + Math.PI * 2 + targetRotation) / 2
+            }
+        }
+    }
+
+    updateBreaking(timeDelta, container) {
+        const quarterDuration = Math.floor(breakDuration / 4)
+        const currentQuarter = Math.floor(this.breaking.time / quarterDuration)
+
+        this.breaking.time += timeDelta
+        if (this.breaking.time >= breakDuration) {
+            this.finishBreakPipe(container)
+        } else {
+            const newQuarter = Math.floor(this.breaking.time / quarterDuration)
+
+            if (newQuarter != currentQuarter) {
+                const name = `Timer${4 - newQuarter}.png`
+                console.log(name)
+                const sprite = this.createTimerSprite(name, this.breaking.point)
+
+                container.removeChild(this.breaking.sprite)
+                this.breaking.sprite = sprite
+                container.addChild(sprite)
             }
         }
     }
@@ -124,7 +161,12 @@ export class Player {
 
     static addAssets(loader) {
         loader.add('player.png', texture)
-        loader.add('BrokenPipeOverlay.png', brokenPipeOverlay)
+        for (let i = 0; i < timerSprites.length; i++) {
+            const timerSprite = timerSprites[i];
+            const name = `Timer${i}.png`
+
+            loader.add(name, timerSprite)
+        }
     }
 
     startInteracting(tile, point) {
@@ -156,8 +198,38 @@ export class Player {
             && this.interacting.tile.type == Type.pipe
             && !this.interacting.tile.pipe.isBroken) {
                 const point = this.interacting.point
-                breakPipe(point, container)
+
+                this.startBreakPipe(point, container)
                 this.stopInteracting()
+            }
+    }
+
+    startBreakPipe(point, container) {
+        const sprite = this.createTimerSprite('Timer4.png', point)
+
+        this.breaking = {
+            point,
+            time: 0,
+            sprite,
         }
+        container.addChild(sprite)
+    }
+
+    finishBreakPipe(container) {
+        const point = this.breaking.point
+
+        container.removeChild(this.breaking.sprite)
+        breakPipe(point, container)
+        this.breaking = null
+    }
+
+    createTimerSprite(name, point, scale = 20) {
+        const sprite = PIXI.Sprite.from(name)
+
+        sprite.x = point.x
+        sprite.y = point.y
+        sprite.scale.set(1 / scale, 1 / scale)
+
+        return sprite
     }
 }

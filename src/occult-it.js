@@ -44,9 +44,9 @@ export class OccultIt {
         this.gameContainer.addChild(state.console.sprite)
     }
 
-    update() {
+    update(timeDelta) {
         for (let player of state.players) {
-            player.update()
+            player.update(timeDelta, this.gameContainer)
         }
 
         if (Math.random() < 0.1) {

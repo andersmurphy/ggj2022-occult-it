@@ -20,6 +20,7 @@ let engine
 let game
 let boardSize = { width: 0, height: 0 }
 let destinationTileSize = { width: 0, height: 0 }
+var lastUpdate = Date.now();
 
 window.document.addEventListener('DOMContentLoaded', load)
 
@@ -139,7 +140,11 @@ function handleResize() {
 
 function update() {
     //fpsMeter.updateTime();
-    game.update()
+    const now = Date.now();
+    const dt = now - lastUpdate;
+    lastUpdate = now;
+
+    game.update(dt)
 }
 
 function render() {
