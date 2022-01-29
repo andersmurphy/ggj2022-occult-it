@@ -11,6 +11,7 @@ export class Player {
         this.vel = new Vector2()
         this.isLocal = isLocal
         this.sprite = new PIXI.Sprite.from('player.png')
+        this.sprite.anchor.set(0.5, 0.5)
         this.up = false
         this.down = false
         this.left = false
@@ -53,6 +54,16 @@ export class Player {
             this.pos.x += this.vel.x
             this.pos.y += this.vel.y
             this.sprite.position.set(this.pos.x, this.pos.y)
+
+            if (this.vel.magnitudeSqr() > 0.1) {
+                const targetRotation = Math.atan2(this.vel.x, -this.vel.y)
+
+                if (Math.abs(this.sprite.rotation - targetRotation) < Math.PI) {
+                    this.sprite.rotation = (this.sprite.rotation + targetRotation) / 2
+                } else {
+                    this.sprite.rotation = (this.sprite.rotation + Math.PI * 2 + targetRotation) / 2
+                }
+            }
         }
     }
 
