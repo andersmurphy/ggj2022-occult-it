@@ -14,4 +14,9 @@ pipe: {
     ids[],
     isBroken
 }
+
+player: {
+    pos,
+    vel
+}
 */

@@ -10,9 +10,11 @@ export class OccultIt {
     engine
     gameContainer
     pipe
+    players
 
     constructor(engine) {
         this.engine = engine
+        this.players = []
     }
 
     loadAssets() {
@@ -33,11 +35,12 @@ export class OccultIt {
         this.gameContainer = this.engine.makeContainer()
         this.gameContainer.scale.set(destinationTileSize.width, destinationTileSize.height)
         this.engine.stage.addChild(this.gameContainer)
-        state.players.push(Player.spawn(this.gameContainer))
+        this.players.push(Player.spawn(this.gameContainer))
+        state.players.push(this.players[this.players.length - 1])
 
         addPipes(this.gameContainer)
 
-        for (let player of state.players) {
+        for (let player of this.players) {
             this.gameContainer.addChild(player.sprite)
         }
 
@@ -46,7 +49,7 @@ export class OccultIt {
     }
 
     update(timeDelta) {
-        for (let player of state.players) {
+        for (let player of this.players) {
             player.update(timeDelta, this.gameContainer)
         }
 

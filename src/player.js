@@ -21,10 +21,10 @@ export class Player {
     interacting
     breaking
     fixing
+    movement
 
-    constructor(pos, isLocal, container) {
-        this.pos = pos
-        this.vel = new Vector2()
+    constructor(movement, isLocal, container) {
+        this.movement = movement
         this.isLocal = isLocal
         this.sprite = PIXI.Sprite.from('player.png')
         this.sprite.anchor.set(0.5, 0.5)
@@ -74,34 +74,34 @@ export class Player {
     }
 
     updateInput() {
-        this.vel.set(0, 0)
+        this.movement.vel.set(0, 0)
         if (this.up) {
-            this.vel.y -= speed
+            this.movement.vel.y -= speed
         }
         if (this.down) {
-            this.vel.y += speed
+            this.movement.vel.y += speed
         }
         if (this.left) {
-            this.vel.x -= speed
+            this.movement.vel.x -= speed
         }
         if (this.right) {
-            this.vel.x += speed
+            this.movement.vel.x += speed
         }
 
         this.updateInteracting()
 
-        const nextPos = this.pos.clone()
+        const nextPos = this.movement.pos.clone()
 
-        nextPos.x += this.vel.x
-        nextPos.y += this.vel.y
+        nextPos.x += this.movement.vel.x
+        nextPos.y += this.movement.vel.y
 
         // Check collisions with pipes/edge
         if (nextPos.x < this.scale / 2 || nextPos.x > pipesGridWidth - this.scale / 2) {
-            nextPos.x -= this.vel.x
+            nextPos.x -= this.movement.vel.x
         }
 
         if (nextPos.y < this.scale / 2 || nextPos.y > pipesGridHeight - this.scale / 2 ) {
-            nextPos.y -= this.vel.y
+            nextPos.y -= this.movement.vel.y
         }
 
         let collisionPoint = new Vector2(Math.floor(nextPos.x), Math.floor(nextPos.y))
@@ -110,13 +110,13 @@ export class Player {
         if (tile.type !== Type.empty) {
             if (tile.type !== Type.pipe || !tile.pipe.isBroken) {
                 // Try without x motion
-                nextPos.x -= this.vel.x
+                nextPos.x -= this.movement.vel.x
                 collisionPoint = new Vector2(Math.floor(nextPos.x), Math.floor(nextPos.y))
                 tile = state.tiles[collisionPoint.x][collisionPoint.y]
                 if (tile.type !== Type.empty && (tile.type !== Type.pipe || !tile.pipe.isBroken)) {
                     // Otherwise try without y motion
-                    nextPos.x += this.vel.x
-                    nextPos.y -= this.vel.y
+                    nextPos.x += this.movement.vel.x
+                    nextPos.y -= this.movement.vel.y
                     collisionPoint = new Vector2(Math.floor(nextPos.x), Math.floor(nextPos.y))
                     tile = state.tiles[collisionPoint.x][collisionPoint.y]
                     if (tile.type !== Type.empty && (tile.type !== Type.pipe || !tile.pipe.isBroken)) {
@@ -129,13 +129,13 @@ export class Player {
             return
         }
         
-        this.pos = nextPos
+        this.movement.pos = nextPos
 
         // Update sprite 
-        this.sprite.position.set(this.pos.x, this.pos.y)
+        this.sprite.position.set(this.movement.pos.x, this.movement.pos.y)
 
-        if (this.vel.magnitudeSqr() > 0.001) {
-            const targetRotation = Math.atan2(this.vel.x, -this.vel.y)
+        if (this.movement.vel.magnitudeSqr() > 0.001) {
+            const targetRotation = Math.atan2(this.movement.vel.x, -this.movement.vel.y)
 
             if (Math.abs(this.sprite.rotation - targetRotation) < Math.PI) {
                 this.sprite.rotation = (this.sprite.rotation + targetRotation) / 2
@@ -146,11 +146,11 @@ export class Player {
     }
 
     updateInteracting() {
-        if (this.vel.x == 0 && this.vel.y == 0) {
+        if (this.movement.vel.x == 0 && this.movement.vel.y == 0) {
             return
         }
-        const rayEnd = this.pos.clone()
-        const normal = this.vel.normalize()
+        const rayEnd = this.movement.pos.clone()
+        const normal = this.movement.vel.normalize()
 
         rayEnd.x += normal.x
         rayEnd.y += normal.y
@@ -169,13 +169,9 @@ export class Player {
         let interactionPoint = new Vector2(Math.floor(rayEnd.x), Math.floor(rayEnd.y))
         let tile = state.tiles[interactionPoint.x][interactionPoint.y]
 
-        if (tile.type !== Type.empty) {
-            if (tile.type == Type.pipe) {
-                this.startInteracting(tile, interactionPoint)
-            } else if (this.isInteracting()) {
-                this.stopInteracting()
-            }
-        } else if (this.isInteracting()) {
+        if (tile.type == Type.pipe) {
+            this.startInteracting(tile, interactionPoint)
+        } else {
             this.stopInteracting()
         }
     }
@@ -192,7 +188,6 @@ export class Player {
 
             if (newQuarter != currentQuarter) {
                 const name = `Timer${4 - newQuarter}.png`
-                console.log(name)
                 const sprite = this.createTimerSprite(name, this.breaking.point)
 
                 container.removeChild(this.breaking.sprite)
@@ -202,8 +197,6 @@ export class Player {
         }
     }
 
-    
-
     static spawn(container) {
         let tries = 1000
 
@@ -212,7 +205,11 @@ export class Player {
 
             const spawnPos = new Vector2(Math.random() * (pipesGridWidth - 1), Math.random() * (pipesGridHeight - 1))
             if (state.tiles[Math.floor(spawnPos.x)][Math.floor(spawnPos.y)].type === Type.empty) {
-                return new Player(spawnPos, true, container)
+                const movement = {
+                    pos: spawnPos,
+                    vel: new Vector2(),
+                }
+                return new Player(movement, true, container)
             }
         }
     }
@@ -228,9 +225,7 @@ export class Player {
     }
 
     startInteracting(tile, point) {
-        if (this.interacting) {
-            this.stopInteracting()
-        }
+        this.stopInteracting()
         this.interacting = { 
             tile,
             point
@@ -240,15 +235,17 @@ export class Player {
     }
 
     isInteracting() {
-        return this.interacting && !(this.vel.x == 0 && this.vel.y == 0)
+        return this.interacting && !(this.movement.vel.x == 0 && this.movement.vel.y == 0)
     }
 
     stopInteracting() {
-        const point = this.interacting.point
-        const sprite = renderState.pipes[point.x][point.y].pipeSprite
+        if (this.interacting) {
+            const point = this.interacting.point
+            const sprite = renderState.pipes[point.x][point.y].pipeSprite
 
-        sprite.tint = 0xffffff
-        this.interacting = null
+            sprite.tint = 0xffffff
+            this.interacting = null
+        }
     }
 
     attemptToBreak(container) {
@@ -315,7 +312,6 @@ export class Player {
 
             if (newQuarter != currentQuarter) {
                 const name = `Timer${4 - newQuarter}.png`
-                console.log(name)
                 const sprite = this.createTimerSprite(name, this.fixing.point)
 
                 container.removeChild(this.fixing.sprite)
