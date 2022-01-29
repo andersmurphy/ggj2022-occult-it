@@ -1,4 +1,8 @@
 import {Vector2} from './vector2.js'
+import state from './state.js'
+
+export const width = 64
+export const height = 40
 
 // Tile types
 export class Type {
@@ -23,14 +27,11 @@ export class PipeDir {
 }
 
 export function makePipes() {
-    const width = 64
-    const height = 40
-    
     const pipes = Array(width).fill(null).map(
         () => Array(height).fill(null).map(() => ({type: Type.empty, pipe: null}))
     )
 
-    const numPipes = 30
+    const numPipes = 100
     
     const goal = new Vector2(Math.floor(width / 2), Math.floor(height / 2))
     
@@ -58,7 +59,7 @@ export function makePipes() {
             xFirst = true
         }
 
-        const maxTries = 400
+        const maxTries = 100
         let tries = maxTries
 
         if (pipes[start.x][start.y].type !== Type.empty) {
@@ -234,7 +235,7 @@ export function debugPipes() {
     let pre = document.createElement('pre')
     for (let y = 0; y < 40; y++) {
         for (let x = 0; x < 64; x++) {
-            const tile = pipes[x][y]
+            const tile = state.pipes[x][y]
 
             if (tile.type === Type.empty) pre.append(' ')
             else if (tile.type === Type.pipe) {
