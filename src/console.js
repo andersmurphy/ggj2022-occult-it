@@ -12,7 +12,7 @@ export class Console {
         this.sprite.scale.set(3 / 240, 3 / 240)
         this.sprite.position.set(pos.x, pos.y)
 
-        this.progressBar = new PIXI.Graphics();
+        this.progressBar = new PIXI.Graphics()
         this.progressBar.position.set(pos.x, pos.y)
     }
 
