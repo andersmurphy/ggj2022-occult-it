@@ -1,8 +1,10 @@
-import {makePipes, debugPipes} from './pipes.js'
-console.log('Hello world!')
+import state from './state.js'
+import {makePipes, debugPipes, pipesGridWidth, pipesGridHeight} from './pipes.js'
 import * as PIXI from 'pixi.js'
 import { PixiEngine } from './pixi-engine.js'
 import { OccultIt } from './occult-it.js'
+import { Vector2 } from './vector2.js'
+import { Player } from './player.js'
 
 //const audioSprites = require('../audio/output.json')
 
@@ -22,9 +24,6 @@ let destinationTileSize = { width: 0, height: 0 }
 
 window.document.addEventListener('DOMContentLoaded', load)
 
-window.pipes = makePipes()
-debugPipes()
-
 function load() {
     // portraitControls.className = 'portrait-controls-container'
     // portraitControls.id = 'mobile-portrait-controls'
@@ -37,6 +36,9 @@ function load() {
 
 function setup() {
     const boardSize = calculateSize();
+    state.pipes = makePipes()
+    state.players.push(new Player(new Vector2(pipesGridWidth / 2, pipesGridHeight / 2 - 5)))
+    debugPipes()
 
     engine = new PixiEngine({
         containerId: gameContainerId,
@@ -51,8 +53,8 @@ function setup() {
 function calculateSize() {
     const sourceTileWidth = 80
     const sourceTileHeight = 80
-    const boardTilesHorizontal = 64
-    const boardTilesVertical = 40
+    const boardTilesHorizontal = pipesGridWidth
+    const boardTilesVertical = pipesGridHeight
     const isStandalone = ((window.navigator)['standalone']) == true
     const width = isStandalone ? document.documentElement.clientWidth : window.innerWidth 
     const height = isStandalone ? document.documentElement.clientHeight : window.innerHeight

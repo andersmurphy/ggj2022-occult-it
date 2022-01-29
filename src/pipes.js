@@ -1,4 +1,8 @@
 import {Vector2} from './vector2.js'
+import state from './state.js'
+
+export const pipesGridWidth = 64
+export const pipesGridHeight = 40
 
 // Tile types
 export class Type {
@@ -23,16 +27,13 @@ export class PipeDir {
 }
 
 export function makePipes() {
-    const width = 64
-    const height = 40
-    
-    const pipes = Array(width).fill(null).map(
-        () => Array(height).fill(null).map(() => ({type: Type.empty, pipe: null}))
+    const pipes = Array(pipesGridWidth).fill(null).map(
+        () => Array(pipesGridHeight).fill(null).map(() => ({type: Type.empty, pipe: null}))
     )
 
-    const numPipes = 30
+    const numPipes = 100
     
-    const goal = new Vector2(Math.floor(width / 2), Math.floor(height / 2))
+    const goal = new Vector2(Math.floor(pipesGridWidth / 2), Math.floor(pipesGridHeight / 2))
     
     for (let i = 0; i < numPipes; i++) {
         // Start a pipe at the edge
@@ -42,23 +43,23 @@ export function makePipes() {
         let start;
         if (edge == 0) {
             // Top
-            start = new Vector2(Math.floor(Math.random() * width), height - 1)
+            start = new Vector2(Math.floor(Math.random() * pipesGridWidth), pipesGridHeight - 1)
             xFirst = false
         } else if (edge === 1) {
             // Right
-            start = new Vector2(width - 1, Math.floor(Math.random() * height))
+            start = new Vector2(pipesGridWidth - 1, Math.floor(Math.random() * pipesGridHeight))
             xFirst = true
         } else if (edge === 2) {
             // Bottom
-            start = new Vector2(Math.floor(Math.random() * width), 0)
+            start = new Vector2(Math.floor(Math.random() * pipesGridWidth), 0)
             xFirst = false
         } else if (edge === 3) {
             // Left
-            start = new Vector2(0,  Math.floor(Math.random() * height))
+            start = new Vector2(0,  Math.floor(Math.random() * pipesGridHeight))
             xFirst = true
         }
 
-        const maxTries = 400
+        const maxTries = 100
         let tries = maxTries
 
         if (pipes[start.x][start.y].type !== Type.empty) {
@@ -118,7 +119,7 @@ export function makePipes() {
                 }
             }
 
-            if (next.x < 0 || next.x >= width || next.y < 0 || next.y >= height) {
+            if (next.x < 0 || next.x >= pipesGridWidth || next.y < 0 || next.y >= pipesGridHeight) {
                 continue
             }
 
@@ -143,7 +144,7 @@ export function makePipes() {
                     if (next.x > current.x && current.x > 1) {
                         path.push(next.clone())
                         next.x++
-                    } else if (next.x < current.x && current.x < width - 2) {
+                    } else if (next.x < current.x && current.x < pipesGridWidth - 2) {
                         path.push(next.clone())
                         next.x--
                     } else {
@@ -153,7 +154,7 @@ export function makePipes() {
                     if (next.y > current.y && current.y > 1) {
                         path.push(next.clone())
                         next.y++
-                    } else if (next.y < current.y && current.y < height - 2) {
+                    } else if (next.y < current.y && current.y < pipesGridHeight - 2) {
                         path.push(next.clone())
                         next.y--
                     } else {
@@ -208,7 +209,7 @@ export function makePipes() {
                             if (next.x > current.x)      tile.pipe.dir = PipeDir.leftRight
                             else if (next.y > current.y) tile.pipe.dir = PipeDir.leftDown
                             else if (next.y < current.y) tile.pipe.dir = PipeDir.leftUp
-                        } else if (current.x === width - 1) {
+                        } else if (current.x === pipesGridWidth - 1) {
                             if (next.x < current.x)      tile.pipe.dir = PipeDir.leftRight
                             else if (next.y > current.y) tile.pipe.dir = PipeDir.rightDown
                             else if (next.y < current.y) tile.pipe.dir = PipeDir.upRight
@@ -216,7 +217,7 @@ export function makePipes() {
                             if (next.x < current.x)      tile.pipe.dir = PipeDir.leftUp
                             else if (next.x > current.x) tile.pipe.dir = PipeDir.upRight
                             else if (next.y > current.y) tile.pipe.dir = PipeDir.upDown
-                        } else if (current.y === height - 1) {
+                        } else if (current.y === pipesGridHeight - 1) {
                             if (next.x < current.x)      tile.pipe.dir = PipeDir.leftDown
                             else if (next.x > current.x) tile.pipe.dir = PipeDir.rightDown
                             else if (next.y < current.y) tile.pipe.dir = PipeDir.upDown
@@ -234,7 +235,7 @@ export function debugPipes() {
     let pre = document.createElement('pre')
     for (let y = 0; y < 40; y++) {
         for (let x = 0; x < 64; x++) {
-            const tile = pipes[x][y]
+            const tile = state.pipes[x][y]
 
             if (tile.type === Type.empty) pre.append(' ')
             else if (tile.type === Type.pipe) {
