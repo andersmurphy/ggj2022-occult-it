@@ -26,8 +26,6 @@ var lastUpdate = Date.now();
 window.document.addEventListener('DOMContentLoaded', load)
 
 function load() {
-    // portraitControls.className = 'portrait-controls-container'
-    // portraitControls.id = 'mobile-portrait-controls'
     //window.localStorage.clear();
     setup()
     window.onresize = handleResize
@@ -49,10 +47,6 @@ function setup() {
 }
 
 function calculateSize() {
-    const sourceTileWidth = 80
-    const sourceTileHeight = 80
-    const boardTilesHorizontal = pipesGridWidth
-    const boardTilesVertical = pipesGridHeight
     const isStandalone = ((window.navigator)['standalone']) == true
     const width = isStandalone ? document.documentElement.clientWidth : window.innerWidth
     const height = isStandalone ? document.documentElement.clientHeight : window.innerHeight
@@ -65,8 +59,8 @@ function calculateSize() {
     };
     console.log("availableSize: " + availableSize.width + " x " + availableSize.height)
 
-    var destinationTileWidth = Math.floor(width / boardTilesHorizontal)
-    var destinationTileHeight = Math.floor(height / boardTilesVertical)
+    var destinationTileWidth = Math.floor(width / pipesGridWidth)
+    var destinationTileHeight = Math.floor(height / pipesGridHeight)
     var minTileDimension = Math.min(destinationTileWidth, destinationTileHeight)
 
     destinationTileWidth = minTileDimension
@@ -78,12 +72,11 @@ function calculateSize() {
     }
     console.log("destinationTileSize: " + destinationTileSize.width + " x " + destinationTileSize.height)
     boardSize = {
-        width: destinationTileWidth * boardTilesHorizontal,
-        height: destinationTileHeight * boardTilesVertical,
+        width: destinationTileWidth * pipesGridWidth,
+        height: destinationTileHeight * pipesGridHeight,
     }
     console.log("BoardSize: " + boardSize.width + " x " + boardSize.height)
     return boardSize
-    //return calculateBoardSize({ width: 224, height: 260 })
 }
 
 function create() {
@@ -130,8 +123,6 @@ function create() {
         // }
         setInterval(update, 1000.0 / engine.fpsMax);
 
-        // let sheet = resources[spriteSheetJson].spritesheet;
-
         render();
     });
 }
@@ -149,7 +140,6 @@ function update() {
 }
 
 function render() {
-
     requestAnimationFrame(render);
     engine.renderer.backgroundColor = 0xC4C4C4
     engine.renderer.render(engine.stage);
