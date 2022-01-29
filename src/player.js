@@ -77,14 +77,17 @@ export class Player {
             }
 
             const collisionPoint = new Vector2(Math.floor(nextPos.x), Math.floor(nextPos.y))
-            let tile = state.pipes[collisionPoint.x][collisionPoint.y]
+            const tile = state.pipes[collisionPoint.x][collisionPoint.y]
+
             if (tile.type !== Type.empty) {
                 if (tile.type == Type.pipe) {
                     this.startInteracting(tile, collisionPoint)
                 } else if (this.isInteracting()) {
                     this.stopInteracting()
                 }
-                return
+                if (!tile.pipe.isBroken) {
+                    return
+                }
             } else if (this.isInteracting()) {
                 this.stopInteracting()
             }
@@ -164,6 +167,7 @@ export class Player {
                 sprite.x = this.interacting.point.x
                 sprite.y = this.interacting.point.y
                 sprite.scale.set(1 / 80, 1 / 80)
+                this.stopInteracting()
         }
     }
 }
