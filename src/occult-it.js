@@ -3,7 +3,7 @@ import { Player } from './player.js'
 import {makePipes, addPipes, debugPipes, pipesGridWidth, pipesGridHeight, addPipeAssets} from './pipes.js'
 import state from './state.js'
 import { Vector2 } from './vector2.js'
-
+import renderState from './render-state.js'
 
 export class OccultIt {
     engine
@@ -23,11 +23,13 @@ export class OccultIt {
 
     create(destinationTileSize) {
         state.pipes = makePipes()
+        renderState.pipes = Array(pipesGridWidth).fill(null).map(
+            () => Array(pipesGridHeight).fill(null).map(() => ({pipeSprite: null, breakSprite: null})))
         //debugPipes()
-        state.players.push(new Player(new Vector2(pipesGridWidth / 2, pipesGridHeight / 2 + 5), true))
         this.gameContainer = this.engine.makeContainer()
         this.gameContainer.scale.set(destinationTileSize.width, destinationTileSize.height)
         this.engine.stage.addChild(this.gameContainer)
+        state.players.push(new Player(new Vector2(pipesGridWidth / 2, pipesGridHeight / 2 + 5), true, this.gameContainer))
 
         addPipes(this.gameContainer)
 

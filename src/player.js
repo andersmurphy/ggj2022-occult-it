@@ -3,14 +3,16 @@ import {Vector2} from './vector2'
 import keyboard from './keyboard'
 import { pipesGridWidth, pipesGridHeight, Type } from './pipes'
 import state from './state'
+import renderState from './render-state'
 
 const texture = require('../assets/Player.png')
+const brokenPipeOverlay = require('../images/BrokenPipeOverlay.png')
 const speed = 0.3 // In tiles per frame
 
 export class Player {
-    interactingTile
+    interacting
 
-    constructor(pos, isLocal) {
+    constructor(pos, isLocal, container) {
         this.pos = pos
         this.vel = new Vector2()
         this.isLocal = isLocal
@@ -22,6 +24,8 @@ export class Player {
         this.down = false
         this.left = false
         this.right = false
+
+        this.interacting = null
 
         const wKey = keyboard(['w', 'W', 'ArrowUp'])
         wKey.press = () =>  this.up = true
@@ -40,7 +44,7 @@ export class Player {
         dKey.release = () => this.right = false
 
         const rKey = keyboard(['r', 'R'])
-        rKey.press = this.attemptToBreak
+        rKey.press = () => this.attemptToBreak(container)
     }
 
     update() {
@@ -72,10 +76,11 @@ export class Player {
                 return
             }
 
-            let tile = state.pipes[Math.floor(nextPos.x)][Math.floor(nextPos.y)]
+            const collisionPoint = new Vector2(Math.floor(nextPos.x), Math.floor(nextPos.y))
+            let tile = state.pipes[collisionPoint.x][collisionPoint.y]
             if (tile.type !== Type.empty) {
                 if (tile.type == Type.pipe) {
-                    this.startInteracting(tile)
+                    this.startInteracting(tile, collisionPoint)
                 } else if (this.isInteracting()) {
                     this.stopInteracting()
                 }
@@ -103,30 +108,49 @@ export class Player {
 
     static addAssets(loader) {
         loader.add('player.png', texture)
+        loader.add('BrokenPipeOverlay.png', brokenPipeOverlay)
     }
 
-    startInteracting(tile) {
-        if (this.interactingTile) {
+    startInteracting(tile, point) {
+        if (this.interacting) {
             this.stopInteracting()
         }
-        this.interactingTile = tile
-        this.interactingTile.sprite.tint = 0xff00ff
+        this.interacting = { 
+            tile,
+            point
+        }
+        const sprite = renderState.pipes[point.x][point.y].pipeSprite
+        sprite.tint = 0xff00ff
     }
 
     isInteracting() {
-        return this.interactingTile && !(this.vel.x == 0 && this.vel.y == 0)
+        return this.interacting && !(this.vel.x == 0 && this.vel.y == 0)
     }
 
     stopInteracting() {
-        this.interactingTile.sprite.tint = 0xffffff
-        this.interactingTile = undefined
+        const point = this.interacting.point
+        const sprite = renderState.pipes[point.x][point.y].pipeSprite
+
+        sprite.tint = 0xffffff
+        this.interacting = null
     }
 
-    attemptToBreak() {
-        if (this.interactingTile
-            && this.interactingTile.type == Type.pipe
-            && !this.interactingTile.pipe.isBroken) {
-                this.interactingTile.pipe.isBroken = true
+    attemptToBreak(container) {
+        if (this.interacting
+            && this.interacting.tile.type == Type.pipe
+            && !this.interacting.tile.pipe.isBroken) {
+                this.interacting.tile.pipe.isBroken = true
+                const point = this.interacting.point
+                const sprite = PIXI.Sprite.from('BrokenPipeOverlay.png')
+
+                console.log(sprite)
+                renderState.pipes[point.x][point.y].breakSprite = sprite
+
+                container.addChild(sprite)
+                sprite.x = this.interacting.point.x
+                sprite.y = this.interacting.point.y
+                sprite.scale.set(1 / 80, 1 / 80)
+
                 //this.interactingTile.pipe.brokenSprite = 
         }
     }

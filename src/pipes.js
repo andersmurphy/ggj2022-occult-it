@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js'
 import {Vector2} from './vector2.js'
 import state from './state.js'
+import renderState from './render-state.js'
 
 export const pipesGridWidth = 64
 export const pipesGridHeight = 40
@@ -321,9 +322,8 @@ export function addPipes(container) {
                 sprite.x = x
                 sprite.y = y
                 sprite.scale.set(1 / 80, 1 / 80)
-                tile.sprite = sprite
+                renderState.pipes[x][y] = { pipeSprite: sprite }
             }
         }
     }
-
 }
