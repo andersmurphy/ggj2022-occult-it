@@ -125,7 +125,7 @@ function create() {
         audioFiles.forEach(audioFile => {
             const pathname = audioFile.pathname
             const exportedFilename = pathname.substring(1, pathname.length)
-            console.log(exportedFilename)
+
             exportedUrls.push(exportedFilename)
         });
 
