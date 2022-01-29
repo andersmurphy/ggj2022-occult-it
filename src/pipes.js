@@ -298,6 +298,7 @@ export function addPipes(container) {
                 sprite.x = x
                 sprite.y = y
                 sprite.scale.set(1 / 80, 1 / 80)
+                tile.sprite = sprite
             }
         }
     }
