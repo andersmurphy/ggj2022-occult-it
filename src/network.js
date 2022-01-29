@@ -1,8 +1,6 @@
 import Peer from 'peerjs'
 
 let hostId = 'occult-2'
-let sendButton = document.getElementById('sendButton')
-let sendInput  = document.getElementById('sendInput')
 
 let peer = new Peer(hostId)
 peer.on('error', function(err) {
@@ -10,25 +8,20 @@ peer.on('error', function(err) {
   setTimeout(() =>
     {
       let conn = peer.connect(hostId)
-      conn.on('open', function() {
-        console.log('conneted to host!')
-        conn.on('data', function(data) {
+      conn.on('open', () => {
+        console.log('Conneted to host!')
+        conn.on('data', (data) => {
           console.log('Received', data)
         })
-        // this is what we would use to send data to the other peer
-        sendButton.addEventListener(
-          'click', () => conn.send(sendInput.value), false)
+        conn.send(peer.id + ' connected!')
       })
     }, 1000)
 })
 
-peer.on('connection', function(conn) {
-  conn.on('open', function() {
-    conn.on('data', function(data) {
+peer.on('connection', (conn) => {
+  conn.on('open', () => {
+    conn.on('data', (data) => {
       console.log('Received', data)
     })
-    // this is what we would use to send data to the other peer
-    sendButton.addEventListener(
-      'click', () => conn.send(sendInput.value), false)
   })
 })
