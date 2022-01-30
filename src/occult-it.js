@@ -29,6 +29,8 @@ export class OccultIt {
     }
 
     create(destinationTileSize) {
+        window.gamestate = state
+
         renderState.pipes = Array(pipesGridWidth).fill(null).map(
             () => Array(pipesGridHeight).fill(null).map(() => ({pipeSprite: null, breakSprite: null, floodGraphic: null})))
 
@@ -70,6 +72,7 @@ export class OccultIt {
         addPipes(this.gameContainer)
 
         for (let player of this.players) {
+            console.log('Creating sprite for player ', player.movement.id)
             this.gameContainer.addChild(player.sprite)
         }
     }
@@ -118,8 +121,12 @@ export class OccultIt {
                 this.theConsole.setState(state.console)
 
                 state.players.forEach(playerState => {
-                    this.players.push(Player.spawn(this.gameContainer, this.engine.audio, playerState.id))
+                    const player = new Player(playerState, false, this.gameContainer, this.engine.audio)
+                    this.players.push(player)
+                    // this.players.push(Player.spawn(this.gameContainer, this.engine.audio, playerState.id))
                 });
+
+                window.players = this.players
 
                 this.addSprites()
                 // setOutState({
@@ -145,6 +152,7 @@ export class OccultIt {
     }
 
     spawnSelf() {
+        console.log('Spawning self')
         const newPlayer = Player.spawn(this.gameContainer, this.engine.audio, getNetworkId())
         this.players.push(newPlayer)
         state.players.push(newPlayer.movement)

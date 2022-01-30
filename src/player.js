@@ -41,27 +41,29 @@ export class Player {
         this.breaking = null
         this.fixing = null
 
-        const wKey = keyboard(['w', 'W', 'ArrowUp'])
-        wKey.press = () =>  this.up = true
-        wKey.release = () => this.up = false
+        if (this.isLocal) {
+            const wKey = keyboard(['w', 'W', 'ArrowUp'])
+            wKey.press = () =>  this.up = true
+            wKey.release = () => this.up = false
 
-        const sKey = keyboard(['s', 'S', 'ArrowDown'])
-        sKey.press = () =>  this.down = true
-        sKey.release = () => this.down = false
+            const sKey = keyboard(['s', 'S', 'ArrowDown'])
+            sKey.press = () =>  this.down = true
+            sKey.release = () => this.down = false
 
-        const aKey = keyboard(['a', 'A', 'ArrowLeft'])
-        aKey.press = () =>  this.left = true
-        aKey.release = () => this.left = false
+            const aKey = keyboard(['a', 'A', 'ArrowLeft'])
+            aKey.press = () =>  this.left = true
+            aKey.release = () => this.left = false
 
-        const dKey = keyboard(['d', 'D', 'ArrowRight'])
-        dKey.press = () =>  this.right = true
-        dKey.release = () => this.right = false
+            const dKey = keyboard(['d', 'D', 'ArrowRight'])
+            dKey.press = () =>  this.right = true
+            dKey.release = () => this.right = false
 
-        const rKey = keyboard(['r', 'R', ' ', 'p', 'P'])
-        rKey.press = () => this.attemptToBreak(container)
+            const rKey = keyboard(['r', 'R', ' ', 'p', 'P'])
+            rKey.press = () => this.attemptToBreak(container)
 
-        const fKey = keyboard(['f', 'F', 'l', 'L'])
-        fKey.press = () => this.attemptToFix(container)
+            const fKey = keyboard(['f', 'F', 'l', 'L'])
+            fKey.press = () => this.attemptToFix(container)
+        }
     }
 
     update(timeDelta, container) {
@@ -72,6 +74,22 @@ export class Player {
                 this.updateFixing(timeDelta, container)
             } else {
                 this.updateInput()
+            }
+        }
+        this.updateSprite()
+    }
+
+    updateSprite() {
+        // Update sprite 
+        this.sprite.position.set(this.movement.pos.x, this.movement.pos.y)
+
+        if (this.movement.vel.magnitudeSqr() > 0.001) {
+            const targetRotation = Math.atan2(this.movement.vel.x, -this.movement.vel.y)
+
+            if (Math.abs(this.sprite.rotation - targetRotation) < Math.PI) {
+                this.sprite.rotation = (this.sprite.rotation + targetRotation) / 2
+            } else {
+                this.sprite.rotation = (this.sprite.rotation + Math.PI * 2 + targetRotation) / 2
             }
         }
     }
@@ -134,20 +152,7 @@ export class Player {
         
         this.movement.pos = nextPos
 
-        // Update sprite 
-        this.sprite.position.set(this.movement.pos.x, this.movement.pos.y)
-
-        if (this.movement.vel.magnitudeSqr() > 0.001) {
-            const targetRotation = Math.atan2(this.movement.vel.x, -this.movement.vel.y)
-
-            if (Math.abs(this.sprite.rotation - targetRotation) < Math.PI) {
-                this.sprite.rotation = (this.sprite.rotation + targetRotation) / 2
-            } else {
-                this.sprite.rotation = (this.sprite.rotation + Math.PI * 2 + targetRotation) / 2
-            }
-        }
-
-        if (this.movement.id == getNetworkId()) {
+        if (this.isLocal) {
             if (this.movement.vel.x != 0 
                 || this.movement.vel.y != 0) {
                 setOutState({
@@ -216,6 +221,7 @@ export class Player {
                     pos: spawnPos,
                     vel: new Vector2(),
                 }
+                console.log('Is local: ', id == getNetworkId())
                 return new Player(movement, id == getNetworkId(), container, audio)
             }
         }
