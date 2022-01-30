@@ -318,16 +318,12 @@ export function addPipes(container) {
             }
             else if (tile.type === Type.goal) { /* pre.append('*') */ }
 
-            const floodGraphic = new PIXI.Graphics()
-            // floodGraphic.cacheAsBitmap = true
-            floodGraphic.x = x
-            floodGraphic.y = y
-            floodGraphic.scale.set(1/50, 1/50)
-            floodGraphic.cacheAsBitmap = true
-            floodGraphic.beginFill(0x0000ff, 0.2)
-            // floodGraphic.drawRoundedRect(0, 0, 20, 20, 4)
-            renderState.pipes[x][y].floodGraphic = floodGraphic
-            container.addChild(floodGraphic)
+            const floodSprite = new PIXI.Graphics()
+            floodSprite.x = x
+            floodSprite.y = y
+            floodSprite.scale.set(1/50, 1/50)
+            renderState.pipes[x][y].floodSprite = floodSprite
+            container.addChild(floodSprite)
 
             if (sprite) {
                 container.addChild(sprite)
@@ -362,15 +358,29 @@ export function fixPipe(point, container) {
 }
 
 const maxFlooding = 16
+const floodTextures = []
+
+export function makeFloodTextures(renderer) {
+    for (let i = 0; i < 16; i++) {
+        const graphic = new PIXI.Graphics()
+        graphic.scale.set(1/50, 1/50)
+        graphic.cacheAsBitmap = true
+        graphic.beginFill(0x990000, i / maxFlooding)
+        graphic.drawRect(0, 0, 50, 50)
+
+        const texture = PIXI.RenderTexture.create({ width: 50, height: 50 })
+        renderer.render(graphic, {texture});
+        floodTextures.push(texture)
+    }
+
+    console.log(floodTextures)
+}
+
 
 function renderFlood(x, y) {
     const tile = state.tiles[x][y]
-    const floodGraphic = renderState.pipes[x][y].floodGraphic
-    floodGraphic.cacheAsBitmap = false
-    floodGraphic.clear()
-    floodGraphic.beginFill(0x990000, tile.flooding / maxFlooding)
-    floodGraphic.drawRect(0, 0, 50, 50)
-    floodGraphic.cacheAsBitmap = true
+    const floodSprite = renderState.pipes[x][y].floodSprite
+    floodSprite.texture = floodTextures[tile.flooding]
 }
 
 

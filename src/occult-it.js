@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
 import { Player } from './player.js'
-import {makePipes, addPipes, debugPipes, pipesGridWidth, pipesGridHeight, addPipeAssets, Type, breakPipe, checkFlooding} from './pipes.js'
+import {makePipes, addPipes, debugPipes, pipesGridWidth, pipesGridHeight, addPipeAssets, Type, breakPipe, checkFlooding, makeFloodTextures} from './pipes.js'
 import state from './state.js'
 import { Vector2 } from './vector2.js'
 import renderState from './render-state.js'
@@ -22,6 +22,7 @@ export class OccultIt {
         Player.addAssets(loader)
         Console.addAssets(loader)
         addPipeAssets(loader)
+        makeFloodTextures(this.engine.renderer)
         return loader
     }
 

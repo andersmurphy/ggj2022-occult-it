@@ -3,7 +3,7 @@ import Peer from 'peerjs'
 // Id of the Host. Change this if you are having weird issues.
 // Chances are someone else who may be running an old Client
 // is the Host.
-let hostId = 'occult-5'
+let hostId = 'occult-55'
 
 let peer = new Peer(hostId)
 let connections = new Set()
