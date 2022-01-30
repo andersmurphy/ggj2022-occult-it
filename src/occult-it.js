@@ -41,14 +41,28 @@ export class OccultIt {
         this.theConsole = new Console(new Vector2(pipesGridWidth /2 - 1, pipesGridHeight / 2 - 1))
         state.console = this.theConsole.state
 
+        this.continueCreate(250)
+    }
 
+    continueCreate(timeout) {
         let networkId = getNetworkId()
-        while (!networkId) {
-            console.log("Waiting 250ms for networkId")
-            setTimeout(() => networkId = getNetworkId(), 250)
-            //networkId = getNetworkId()
-        }
 
+        if (!networkId) {
+            console.log(`Waiting ${timeout}ms for networkId`)
+            setTimeout(() => {
+                networkId = getNetworkId()
+                if (networkId) {
+                    this.finishCreate()
+                } else {
+                    this.continueCreate(timeout * 2)
+                }
+            }, timeout)
+        } else {
+            this.finishCreate()
+        }
+    }
+
+    finishCreate() {
         if (isHost()) {
             console.log("I am the host")
             state.tiles = makePipes()
