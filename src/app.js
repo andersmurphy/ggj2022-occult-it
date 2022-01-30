@@ -124,12 +124,11 @@ function create() {
 
         audioFiles.forEach(audioFile => {
             const pathname = audioFile.pathname
-            const exportedFilename = pathname.substring(1, pathname.length)
-
+            const exportedFilename = pathname.split('/').at(-1)
             exportedUrls.push(exportedFilename)
         });
 
-        // engine.loadAudio(exportedUrls, audioSprites.sprite, () => {
+        engine.loadAudio(exportedUrls, audioSprites.sprite, () => {
             game.create(destinationTileSize);
             //createFramerateCounter(htmlContainer);
             // if (isTouchScreen) {
@@ -138,7 +137,7 @@ function create() {
             setInterval(update, 1000.0 / engine.fpsMax);
 
             render();
-        // });
+        });
     });
 }
 
