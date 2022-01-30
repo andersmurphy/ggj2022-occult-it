@@ -163,6 +163,7 @@ export class OccultIt {
                         const player = new Player(playerState, false, this.gameContainer, this.engine.audio)
                         this.players.push(player)
                         state.players.push(playerState)
+                        this.gameContainer.addChild(player.sprite)
                     }
                 } else if (aNewState.command == NetCommandId.pipe) {
                     updatePipeState(aNewState.pipe, this.gameContainer)
