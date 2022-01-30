@@ -63,11 +63,9 @@ peer.on('connection', (conn) => {
     conn.on('data', (data) => {
       // Add to Host inState
       inState.push(data)
+      // Forward Data to Peers
+      connections.forEach((conn) => conn.send(data))
     })
-    // Send full state to new client
-    // conn.send({
-
-    // })
     console.log("Sending Initial State ", state)
     conn.send({
       command: NetCommandId.game,
