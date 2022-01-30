@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js'
 import {Vector2} from './vector2.js'
 import state from './state.js'
 import renderState from './render-state.js'
+import { getNetworkId, isHost, NetCommandId, setOutState } from './network.js'
 
 export const pipesGridWidth = 64
 export const pipesGridHeight = 40
@@ -340,7 +341,7 @@ export function addPipes(container) {
     }
 }
 
-export function breakPipe(point, container) {
+export function breakPipe(point, container, breakerId) {
     const sprite = PIXI.Sprite.from('BrokenPipeOverlay.png')
     renderState.pipes[point.x][point.y].breakSprite = sprite
 
@@ -350,15 +351,35 @@ export function breakPipe(point, container) {
     sprite.x = point.x
     sprite.y = point.y
     sprite.scale.set(1 / 80, 1 / 80)
+
+    if (breakerId == getNetworkId()) {
+        setOutState({
+            command: NetCommandId.pipe,
+            pipe: {
+                point,
+                state: state.tiles[point.x][point.y].pipe
+            }
+        })
+    }
 }
 
-export function fixPipe(point, container) {
+export function fixPipe(point, container, fixerId) {
     const sprite = renderState.pipes[point.x][point.y].breakSprite
 
     container.removeChild(sprite)
 
     renderState.pipes[point.x][point.y].breakSprite = null
     state.tiles[point.x][point.y].pipe.isBroken = false
+
+    if (fixerId == getNetworkId()) {
+        setOutState({
+            command: NetCommandId.pipe,
+            pipe: {
+                point,
+                state: state.tiles[point.x][point.y].pipe
+            }
+        })
+    }
 }
 
 const maxFlooding = 16

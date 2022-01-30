@@ -84,13 +84,14 @@ export class OccultIt {
 
         this.console.update()
 
-        if (Math.random() < 0.01) {
+        if (isHost() 
+            && Math.random() < 0.01) {
             // Break a random pipe
             const breakPos = new Vector2(Math.random() * (pipesGridWidth - 1), Math.random() * (pipesGridHeight - 1))
             breakPos.set(Math.floor(breakPos.x), Math.floor(breakPos.y))
             const pipeToBreak = state.tiles[breakPos.x][breakPos.y]
             if (pipeToBreak.type === Type.pipe) {
-                breakPipe(breakPos, this.gameContainer)
+                breakPipe(breakPos, this.gameContainer, getNetworkId())
             }
         }
 
