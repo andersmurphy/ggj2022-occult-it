@@ -18,6 +18,7 @@ export class OccultIt {
     constructor(engine) {
         this.engine = engine
         this.players = []
+        this.madeText = false
     }
 
     loadAssets() {
@@ -84,10 +85,26 @@ export class OccultIt {
         }
 
         for (let player of this.players) {
-            player.update(timeDelta, this.gameContainer)
+            if (!this.madeText) {
+                player.update(timeDelta, this.gameContainer)
+            }
         }
 
         this.theConsole.update()
+
+        if (this.theConsole.won && !this.madeText) {
+            this.madeText = true
+            let text = new PIXI.Text('THANKYOU HUMANS COMPUTATION COMPLETE');
+            this.gameContainer.addChild(text)
+            text.scale.set(0.08, 0.08)
+            text.position.set(5, 20)
+        } else if (this.theConsole.lost && !this.madeText) {
+            this.madeText = true
+            let text = new PIXI.Text('ERROR COMPUTATION FAILED: NOT ENOUGH FLUID');
+            text.scale.set(0.08, 0.08)
+            text.position.set(5, 10)
+            this.gameContainer.addChild(text)
+        }
 
         if (isHost() 
             && Math.random() < 0.01) {

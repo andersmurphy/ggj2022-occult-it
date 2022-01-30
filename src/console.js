@@ -13,6 +13,8 @@ export class Console {
         }
 
         this.createSprites()
+        this.won = false
+        this.lost = false
     }
 
     update() {
@@ -21,6 +23,10 @@ export class Console {
         const broken = pipeStat.broken.size
         const total = pipeStat.all.size
         const nonBroken = total - broken
+        
+        if (broken >  3 * total / 4 && !this.won) {
+            this.lost = true
+        }
 
         // console.log(broken, total)
 
@@ -34,9 +40,14 @@ export class Console {
 
         // console.log(progressMult)
         this.state.progress = Math.min(this.state.progress + this.state.progressRate * progressMult, 1)
+        this.state.progress = Math.max(this.state.progress, 0)
         this.progressBar.clear()
         this.progressBar.lineStyle(0.4, 0x55ff55, 0.7)
         this.progressBar.arc(1.5, 1.5, 1, 0, Math.PI * 2 * this.state.progress);
+
+        if (this.state.progress == 1 && !this.lost) {
+            this.won = true
+        }
     }
 
     setState(newState) {
