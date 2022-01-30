@@ -129,7 +129,7 @@ function create() {
             exportedUrls.push(exportedFilename)
         });
 
-        engine.loadAudio(exportedUrls, audioSprites.sprite, () => {
+        // engine.loadAudio(exportedUrls, audioSprites.sprite, () => {
             game.create(destinationTileSize);
             //createFramerateCounter(htmlContainer);
             // if (isTouchScreen) {
@@ -138,7 +138,7 @@ function create() {
             setInterval(update, 1000.0 / engine.fpsMax);
 
             render();
-        });
+        // });
     });
 }
 
