@@ -4,6 +4,7 @@ import keyboard from './keyboard'
 import { pipesGridWidth, pipesGridHeight, Type, breakPipe, fixPipe } from './pipes'
 import state from './state'
 import renderState from './render-state'
+import { setOutState, NetCommandId } from './network'
 
 const texture = require('../assets/Player.png')
 const timerSprites = [
@@ -145,6 +146,13 @@ export class Player {
                 this.sprite.rotation = (this.sprite.rotation + Math.PI * 2 + targetRotation) / 2
             }
         }
+
+        if (this.movement.vel.x != 0 && this.movement.vel.y != 0) {
+            setOutState({
+                command: NetCommandId.player,
+                movement: this.movement,
+            })
+        }
     }
 
     updateInteracting() {
@@ -192,7 +200,7 @@ export class Player {
         }
     }
 
-    static spawn(container, audio) {
+    static spawn(container, audio, id) {
         let tries = 1000
 
         while (tries > 0) {
@@ -201,6 +209,7 @@ export class Player {
             const spawnPos = new Vector2(1 + Math.random() * (pipesGridWidth - 3), 1 + Math.random() * (pipesGridHeight - 3))
             if (state.tiles[Math.floor(spawnPos.x)][Math.floor(spawnPos.y)].type === Type.empty) {
                 const movement = {
+                    id,
                     pos: spawnPos,
                     vel: new Vector2(),
                 }

@@ -5,12 +5,15 @@ import state from './state.js'
 import { Vector2 } from './vector2.js'
 import renderState from './render-state.js'
 import { Console } from './console.js'
+import { getNetworkId, inState, isHost, NetCommandId, setOutState } from './network.js'
+import { sleep } from './sleep.js'
 
 export class OccultIt {
     engine
     gameContainer
     pipe
     players
+    console
 
     constructor(engine) {
         this.engine = engine
@@ -26,34 +29,60 @@ export class OccultIt {
     }
 
     create(destinationTileSize) {
-        state.tiles = makePipes()
         renderState.pipes = Array(pipesGridWidth).fill(null).map(
             () => Array(pipesGridHeight).fill(null).map(() => ({pipeSprite: null, breakSprite: null, floodGraphic: null})))
-        //debugPipes()
-        state.console = new Console(new Vector2(pipesGridWidth /2 - 1, pipesGridHeight / 2 - 1))
 
         this.gameContainer = this.engine.makeContainer()
         this.gameContainer.scale.set(destinationTileSize.width, destinationTileSize.height)
         this.engine.stage.addChild(this.gameContainer)
-        this.players.push(Player.spawn(this.gameContainer, this.engine.audio))
-        state.players.push(this.players[this.players.length - 1])
+
+        this.console = new Console(new Vector2(pipesGridWidth /2 - 1, pipesGridHeight / 2 - 1))
+        state.console = this.console.state
+
+
+        let networkId = getNetworkId()
+        while (!networkId) {
+            console.log("Waiting 250ms for networkId")
+            sleep(250)
+            networkId = getNetworkId()
+        }
+
+        if (isHost()) {
+            state.tiles = makePipes()
+            //debugPipes()
+    
+            this.spawnSelf()
+            this.addSprites()
+
+            setOutState({
+                command: NetCommandId.game,
+                state: state
+              })
+        }
+    }
+
+    addSprites() {
+        this.gameContainer.addChild(this.console.sprite)
+        this.gameContainer.addChild(this.console.progressBar)
 
         addPipes(this.gameContainer)
 
         for (let player of this.players) {
             this.gameContainer.addChild(player.sprite)
         }
-
-        this.gameContainer.addChild(state.console.sprite)
-        this.gameContainer.addChild(state.console.progressBar)
     }
 
     update(timeDelta) {
+        this.updateNetworkInput()
+        if (!state.tiles) {
+            return
+        }
+
         for (let player of this.players) {
             player.update(timeDelta, this.gameContainer)
         }
 
-        state.console.update()
+        this.console.update()
 
         if (Math.random() < 0.01) {
             // Break a random pipe
@@ -66,5 +95,43 @@ export class OccultIt {
         }
 
         checkFlooding()
+    }
+
+    updateNetworkInput() {
+        if (inState.length > 0) {
+            const aNewState = inState[0]
+
+            if (aNewState.command == NetCommandId.game) {
+                while (this.gameContainer.children.length > 0) {
+                    this.gameContainer.removeChild(this.gameContainer.children[0])
+                }
+                this.players = []
+                this.spawnSelf()
+                state.tiles = aNewState.state.tiles
+                state.players = aNewState.state.players
+                state.console = aNewState.state.console
+                this.console.setState(state.console)
+
+                state.players.forEach(playerState => {
+                    this.players.push(Player.spawn(this.gameContainer, this.engine.audio, playerState.id))
+                });
+
+                this.addSprites()
+                setOutState({
+                    command: NetCommandId.player,
+                    movement: this.player.movement
+                })
+            } else if (this.tiles) {
+                if (aNewState.command == NetCommandId.player) {
+                    const updatePlayer = this.players.find(p => p.movement.id == aNewState.player.id)
+                }
+            }
+            inState.shift()
+        }
+    }
+
+    spawnSelf() {
+        this.players.push(Player.spawn(this.gameContainer, this.engine.audio, getNetworkId()))
+        state.players.push(this.players[this.players.length - 1])
     }
 }

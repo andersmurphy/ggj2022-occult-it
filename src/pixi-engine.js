@@ -52,7 +52,10 @@ export class PixiEngine {
         Howler.volume(1)
         this.audio = new Howl({ src, sprite })
         this.audio.on("load", callback)
-        this.audio.on("loaderror", (_, error) => console.log('Failed to load audio: ' + error))
+        this.audio.on("loaderror", (_, error) => {
+            console.log('Failed to load audio: ' + error)
+            callback()
+        })
     }
 
     onSpritesLoaded(engine/*: PixiEngine*/) {
