@@ -19,7 +19,7 @@ yarn parcel src/index.html
 ## Deploy
 
 ```
-yarn build
+bash build.sh
 ```
 
 ## Data structure
