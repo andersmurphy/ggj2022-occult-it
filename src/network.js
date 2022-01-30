@@ -63,8 +63,11 @@ peer.on('connection', (conn) => {
     conn.on('data', (data) => {
       // Add to Host inState
       inState.push(data)
-      // Forward Data to Peers
-      connections.forEach((conn) => conn.send(data))
+      // Forward Data to Peers Except current Conn
+      let currentConn = conn
+      connections.forEach((conn) =>
+        // Don't send data to current connection
+        {if (conn.connectionId !== currentConn.connectionId) conn.send(data)})
     })
     console.log("Sending Initial State ", state)
     conn.send({
