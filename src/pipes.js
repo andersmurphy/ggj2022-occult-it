@@ -341,7 +341,27 @@ export function addPipes(container) {
     }
 }
 
-export function breakPipe(point, container, breakerId) {
+export function updatePipeState(netPipeState, container) {
+    const point = netPipeState.point
+    const pipeRenderState = renderState.pipes[point.x][point.y]
+    
+    state.tiles[point.x][point.y].pipe = netPipeState.state
+
+    if (netPipeState.state.isBroken) {
+        const sprite = PIXI.Sprite.from('BrokenPipeOverlay.png')
+
+        pipeRenderState.breakSprite = sprite
+        container.addChild(sprite)
+        sprite.x = point.x
+        sprite.y = point.y
+        sprite.scale.set(1 / 80, 1 / 80)    
+    } else {
+        container.removeChild(pipeRenderState.breakSprite)
+        pipeRenderState.breakSprite = null
+    }
+}
+
+export function breakPipe(point, container) {
     const sprite = PIXI.Sprite.from('BrokenPipeOverlay.png')
     renderState.pipes[point.x][point.y].breakSprite = sprite
 
@@ -352,18 +372,16 @@ export function breakPipe(point, container, breakerId) {
     sprite.y = point.y
     sprite.scale.set(1 / 80, 1 / 80)
 
-    if (breakerId == getNetworkId()) {
-        setOutState({
-            command: NetCommandId.pipe,
-            pipe: {
-                point,
-                state: state.tiles[point.x][point.y].pipe
-            }
-        })
-    }
+    setOutState({
+        command: NetCommandId.pipe,
+        pipe: {
+            point,
+            state: state.tiles[point.x][point.y].pipe
+        }
+    })
 }
 
-export function fixPipe(point, container, fixerId) {
+export function fixPipe(point, container) {
     const sprite = renderState.pipes[point.x][point.y].breakSprite
 
     container.removeChild(sprite)
@@ -371,15 +389,13 @@ export function fixPipe(point, container, fixerId) {
     renderState.pipes[point.x][point.y].breakSprite = null
     state.tiles[point.x][point.y].pipe.isBroken = false
 
-    if (fixerId == getNetworkId()) {
-        setOutState({
-            command: NetCommandId.pipe,
-            pipe: {
-                point,
-                state: state.tiles[point.x][point.y].pipe
-            }
-        })
-    }
+    setOutState({
+        command: NetCommandId.pipe,
+        pipe: {
+            point,
+            state: state.tiles[point.x][point.y].pipe
+        }
+    })
 }
 
 const maxFlooding = 16

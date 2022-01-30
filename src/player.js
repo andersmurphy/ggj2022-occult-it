@@ -281,7 +281,7 @@ export class Player {
         const point = this.breaking.point
 
         container.removeChild(this.breaking.sprite)
-        breakPipe(point, container, getNetworkId())
+        breakPipe(point, container)
         this.breaking = null
     }
 
@@ -336,7 +336,7 @@ export class Player {
         const point = this.fixing.point
 
         container.removeChild(this.fixing.sprite)
-        fixPipe(point, container, getNetworkId())
+        fixPipe(point, container)
         this.fixing = null
     }
 

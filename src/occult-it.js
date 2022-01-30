@@ -91,7 +91,7 @@ export class OccultIt {
             breakPos.set(Math.floor(breakPos.x), Math.floor(breakPos.y))
             const pipeToBreak = state.tiles[breakPos.x][breakPos.y]
             if (pipeToBreak.type === Type.pipe) {
-                breakPipe(breakPos, this.gameContainer, getNetworkId())
+                breakPipe(breakPos, this.gameContainer)
             }
         }
 
@@ -133,6 +133,8 @@ export class OccultIt {
                         && updateStateIndex < state.players.length) {
                             state.players[updateStateIndex] = aNewState.movement
                         }
+                } else if (aNewState.command == NetCommandId.pipe) {
+                    updatePipeState(aNewState.pipe, this.gameContainer)
                 }
             }
             inState.shift()
