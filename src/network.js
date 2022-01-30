@@ -27,7 +27,7 @@ export const isHost = () => peer ? peer.id == hostId : false;
 export const setOutState = (newState) => {
   outState = newState
   // Send outState to all Peers
-  console.log("Broadcasting: ", outState)
+  //console.log("Broadcasting: ", outState)
   connections.forEach((conn) => conn.send(outState))
 }
 
