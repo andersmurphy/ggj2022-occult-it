@@ -4,7 +4,7 @@ import keyboard from './keyboard'
 import { pipesGridWidth, pipesGridHeight, Type, breakPipe, fixPipe } from './pipes'
 import state from './state'
 import renderState from './render-state'
-import { setOutState, NetCommandId } from './network'
+import { setOutState, NetCommandId, getNetworkId } from './network'
 
 const texture = require('../assets/Player.png')
 const timerSprites = [
@@ -147,12 +147,14 @@ export class Player {
             }
         }
 
-        if (this.movement.vel.x != 0 
-            || this.movement.vel.y != 0) {
-            setOutState({
-                command: NetCommandId.player,
-                movement: this.movement,
-            })
+        if (this.movement.id == getNetworkId()) {
+            if (this.movement.vel.x != 0 
+                || this.movement.vel.y != 0) {
+                setOutState({
+                    command: NetCommandId.player,
+                    movement: this.movement,
+                })
+            }
         }
     }
 
