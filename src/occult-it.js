@@ -6,7 +6,7 @@ import { Vector2 } from './vector2.js'
 import renderState from './render-state.js'
 import { Console } from './console.js'
 import { getNetworkId, inState, isHost, NetCommandId, setOutState } from './network.js'
-import { sleep } from './sleep.js'
+import { addWalls, loadWWallSprites } from './walls.js'
 
 export class OccultIt {
     engine
@@ -25,6 +25,7 @@ export class OccultIt {
         Player.addAssets(loader)
         Console.addAssets(loader)
         addPipeAssets(loader)
+        loadWWallSprites(loader)
         return loader
     }
 
@@ -89,6 +90,7 @@ export class OccultIt {
             console.log('Creating sprite for player ', player.movement.id)
             this.gameContainer.addChild(player.sprite)
         }
+        addWalls(this.gameContainer)
     }
 
     update(timeDelta) {
