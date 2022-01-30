@@ -129,21 +129,34 @@ export class OccultIt {
                 window.players = this.players
 
                 this.addSprites()
-                // setOutState({
-                //     command: NetCommandId.player,
-                //     movement: localPlayer.movement
-                // })
+                setOutState({
+                    command: NetCommandId.player,
+                    movement: localPlayer.movement
+                })
             } else if (this.tiles) {
                 if (aNewState.command == NetCommandId.player) {
                     const updatePlayer = this.players.find(p => p.movement.id == aNewState.movement.id)
-                    const updateStateIndex = state.players.findIndex(ps => ps.id == aNewState.movement.id)
-                    
-                    updatePlayer.movement = aNewState.movement
 
-                    if (updateStateIndex >= 0
-                        && updateStateIndex < state.players.length) {
-                            state.players[updateStateIndex] = aNewState.movement
+                    if (updatePlayer) {
+                        const updateStateIndex = state.players.findIndex(ps => ps.id == aNewState.movement.id)
+                    
+                        updatePlayer.movement = aNewState.movement
+    
+                        if (updateStateIndex >= 0
+                            && updateStateIndex < state.players.length) {
+                                state.players[updateStateIndex] = aNewState.movement
+                            }
+                    } else {
+                        // a new player 
+                        const playerState = {
+                            id: aNewState.movement.id,
+                            pos: new Vector2(aNewState.movement.pos.x, aNewState.movement.pos.y),
+                            vel: new Vector2(aNewState.movement.vel.x, aNewState.movement.vel.y),
                         }
+                        const player = new Player(playerState, false, this.gameContainer, this.engine.audio)
+                        this.players.push(player)
+                        state.players.push(playerState)
+                    }
                 } else if (aNewState.command == NetCommandId.pipe) {
                     updatePipeState(aNewState.pipe, this.gameContainer)
                 }
