@@ -368,7 +368,7 @@ function renderFlood(x, y) {
     const floodGraphic = renderState.pipes[x][y].floodGraphic
     floodGraphic.cacheAsBitmap = false
     floodGraphic.clear()
-    floodGraphic.beginFill(0x8888ee, tile.flooding / maxFlooding)
+    floodGraphic.beginFill(0x990000, tile.flooding / maxFlooding)
     floodGraphic.drawRect(0, 0, 50, 50)
     floodGraphic.cacheAsBitmap = true
 }
