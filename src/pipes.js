@@ -326,7 +326,10 @@ export function addPipes(container) {
             floodGraphic.y = y
             floodGraphic.scale.set(1/50, 1/50)
             floodGraphic.cacheAsBitmap = true
-            floodGraphic.beginFill(0x0000ff, 0.2)
+            floodGraphic.clear()
+            floodGraphic.beginFill(0x990000, 1)
+            floodGraphic.alpha = 0
+            floodGraphic.drawRect(0, 0, 50, 50)
             // floodGraphic.drawRoundedRect(0, 0, 20, 20, 4)
             renderState.pipes[x][y].floodGraphic = floodGraphic
             container.addChild(floodGraphic)
@@ -368,11 +371,7 @@ const maxFlooding = 16
 function renderFlood(x, y) {
     const tile = state.tiles[x][y]
     const floodGraphic = renderState.pipes[x][y].floodGraphic
-    floodGraphic.cacheAsBitmap = false
-    floodGraphic.clear()
-    floodGraphic.beginFill(0x990000, tile.flooding / maxFlooding)
-    floodGraphic.drawRect(0, 0, 50, 50)
-    floodGraphic.cacheAsBitmap = true
+    floodGraphic.alpha = tile.flooding / maxFlooding
 }
 
 export function pipeStatus() {
