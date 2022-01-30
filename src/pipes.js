@@ -361,7 +361,7 @@ export function fixPipe(point, container) {
     state.tiles[point.x][point.y].pipe.isBroken = false
 }
 
-const maxFlooding = 10
+const maxFlooding = 16
 
 function renderFlood(x, y) {
     const tile = state.tiles[x][y]
@@ -374,8 +374,8 @@ function renderFlood(x, y) {
 }
 
 
-const floodChance = 0.01
-const evaporationTime = 3000
+const floodChance = 0.03
+const evaporationTime = 1000
 
 export function checkFlooding() {
     let updatesLeft = 20
@@ -390,7 +390,7 @@ export function checkFlooding() {
             if (tile.type === Type.pipe) {
                 if (tile.pipe.isBroken) {
                     tile.evaporation = evaporationTime
-                    if (tile.flooding < maxFlooding) {
+                    if (tile.flooding <= maxFlooding) { // Intentionally overflood broken pipes
                         tile.flooding++
                         renderFlood(x, y)
                         updatesLeft--
