@@ -123,7 +123,15 @@ export class OccultIt {
                 })
             } else if (this.tiles) {
                 if (aNewState.command == NetCommandId.player) {
-                    const updatePlayer = this.players.find(p => p.movement.id == aNewState.player.id)
+                    const updatePlayer = this.players.find(p => p.movement.id == aNewState.movement.id)
+                    const updateStateIndex = state.players.findIndex(ps => ps.id == aNewState.movement.id)
+                    
+                    updatePlayer.movement = aNewState.movement
+
+                    if (updateStateIndex >= 0
+                        && updateStateIndex < state.players.length) {
+                            state.players[updateStateIndex] = aNewState.movement
+                        }
                 }
             }
             inState.shift()
