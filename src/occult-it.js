@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
 import { Player } from './player.js'
-import {makePipes, addPipes, debugPipes, pipesGridWidth, pipesGridHeight, addPipeAssets, Type, breakPipe, checkFlooding} from './pipes.js'
+import {makePipes, addPipes, debugPipes, pipesGridWidth, pipesGridHeight, addPipeAssets, Type, breakPipe, checkFlooding, updatePipeState} from './pipes.js'
 import state from './state.js'
 import { Vector2 } from './vector2.js'
 import renderState from './render-state.js'
@@ -121,6 +121,8 @@ export class OccultIt {
                 this.theConsole.setState(state.console)
 
                 state.players.forEach(playerState => {
+                    playerState.pos = new Vector2(playerState.pos.x, playerState.pos.y)
+                    playerState.vel = new Vector2(playerState.vel.x, playerState.vel.y)
                     const player = new Player(playerState, false, this.gameContainer, this.engine.audio)
                     this.players.push(player)
                     // this.players.push(Player.spawn(this.gameContainer, this.engine.audio, playerState.id))
@@ -133,11 +135,16 @@ export class OccultIt {
                 //     command: NetCommandId.player,
                 //     movement: localPlayer.movement
                 // })
-            } else if (this.tiles) {
+            } else if (state.tiles) {
                 if (aNewState.command == NetCommandId.player) {
+                    console.log(aNewState.movement.id)
                     const updatePlayer = this.players.find(p => p.movement.id == aNewState.movement.id)
+                    console.log("Updating player", updatePlayer)
                     const updateStateIndex = state.players.findIndex(ps => ps.id == aNewState.movement.id)
                     
+                    aNewState.movement.pos = new Vector2(aNewState.movement.pos.x, aNewState.movement.pos.y)
+                    aNewState.movement.vel = new Vector2(aNewState.movement.vel.x, aNewState.movement.vel.y)
+
                     updatePlayer.movement = aNewState.movement
 
                     if (updateStateIndex >= 0
