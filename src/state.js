@@ -1,6 +1,7 @@
 export default {
     tiles: null,
-    players: []
+    players: [],
+    console: null,
 }
 
 /*
@@ -16,6 +17,7 @@ pipe: {
 }
 
 player: {
+    id,
     pos,
     vel
 }
