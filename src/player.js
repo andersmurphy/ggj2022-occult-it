@@ -147,7 +147,8 @@ export class Player {
             }
         }
 
-        if (this.movement.vel.x != 0 && this.movement.vel.y != 0) {
+        if (this.movement.vel.x != 0 
+            || this.movement.vel.y != 0) {
             setOutState({
                 command: NetCommandId.player,
                 movement: this.movement,
