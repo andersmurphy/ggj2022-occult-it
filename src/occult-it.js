@@ -116,15 +116,15 @@ export class OccultIt {
                 this.players = []
                 state.tiles = aNewState.state.tiles
                 state.players = aNewState.state.players
+                console.log("Players: ", state.players)
                 state.console = aNewState.state.console
-                const localPlayer = this.spawnSelf()
                 this.theConsole.setState(state.console)
 
                 state.players.forEach(playerState => {
                     const player = new Player(playerState, false, this.gameContainer, this.engine.audio)
                     this.players.push(player)
-                    // this.players.push(Player.spawn(this.gameContainer, this.engine.audio, playerState.id))
                 });
+                const localPlayer = this.spawnSelf()
 
                 window.players = this.players
 
