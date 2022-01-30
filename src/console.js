@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js'
+import { pipeStatus } from './pipes'
 const texture = require('../assets/Console.png')
 
 export class Console {
@@ -17,7 +18,24 @@ export class Console {
     }
 
     update() {
-        this.progress = Math.min(this.progress + this.progressRate, 1)
+        const pipeStat = pipeStatus()
+        // console.log(pipeStat)
+        const broken = pipeStat.broken.size
+        const total = pipeStat.all.size
+        const nonBroken = total - broken
+
+        // console.log(broken, total)
+
+        let progressMult = 1
+
+        if (broken > nonBroken) {
+            progressMult *= -1
+        } else {
+            progressMult = (nonBroken - broken) / total
+        }
+
+        // console.log(progressMult)
+        this.progress = Math.min(this.progress + this.progressRate * progressMult, 1)
         this.progressBar.clear()
         this.progressBar.lineStyle(0.4, 0x55ff55, 0.7)
         this.progressBar.arc(1.5, 1.5, 1, 0, Math.PI * 2 * this.progress);

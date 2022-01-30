@@ -57,7 +57,7 @@ export function makePipes() {
     
     const goal = new Vector2(Math.floor(pipesGridWidth / 2), Math.floor(pipesGridHeight / 2))
     
-    for (let i = 0; i < numPipes; i++) {
+    for (let pipeId = 0; pipeId < numPipes; pipeId++) {
         // Start a pipe at the edge
         const edge = Math.floor(Math.random() * 4)
         let xFirst = false
@@ -216,6 +216,7 @@ export function makePipes() {
             path.push(current.clone())
         }
 
+
         if (tries > 0) {
             // Fill in grid if pipe managed to path to exit
             for (let i = 0; i < path.length; i++) {
@@ -224,13 +225,13 @@ export function makePipes() {
                 const next = path[i+1]
 
                 let tile = pipes[current.x][current.y]
-                if (tile.type === Type.pipe) {  // TODO: Properly implement bridge making
+                if (tile.type === Type.pipe) {
                     // Make a bridge if possible
                     tile.pipe.dir = PipeDir.bridge
-                    tile.pipe.ids = [tile.pipe.id, i]
+                    tile.pipe.ids = [tile.pipe.id, pipeId]
                 } else if (tile.type === Type.empty) {
                     tile.type = Type.pipe
-                    tile.pipe = {ids: [i]}
+                    tile.pipe = {ids: [pipeId]}
 
                     if (last && next) {
                         if (last.x === next.x) tile.pipe.dir = PipeDir.upDown
@@ -272,6 +273,7 @@ export function makePipes() {
             }
         }
     }
+    window.pipes = pipes
     return pipes
 }
 
@@ -371,6 +373,24 @@ function renderFlood(x, y) {
     floodGraphic.beginFill(0x990000, tile.flooding / maxFlooding)
     floodGraphic.drawRect(0, 0, 50, 50)
     floodGraphic.cacheAsBitmap = true
+}
+
+export function pipeStatus() {
+    const broken = new Set()
+    const all = new Set()
+
+    for (let x = 0; x < pipesGridWidth; x++) {
+        for (let y = 0; y < pipesGridHeight; y++) {
+            const tile = state.tiles[x][y]
+            if (tile.type === Type.pipe) {
+                for (let id of tile.pipe.ids) {
+                    if (tile.pipe.isBroken) broken.add(id)
+                    else all.add(id)
+                }
+            }
+        }
+    }
+    return {broken, all}
 }
 
 

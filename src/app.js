@@ -31,7 +31,6 @@ window.document.addEventListener('DOMContentLoaded', load)
 
 function load() {
     //window.localStorage.clear();
-    console.log(audioFiles)
     setup()
     window.onresize = handleResize
     window.document.onfullscreenchange = handleResize
