@@ -18,13 +18,9 @@ const BrokenPipeOverlay = require('../images/BrokenPipeOverlay.png')
 
 // Tile types
 export class Type {
-    static empty = new Type('empty')
-    static pipe = new Type('pipe')
-    static goal = new Type('goal')
-
-    constructor(name) {
-        this.name = name
-    }
+    static empty = 'empty'
+    static pipe = 'pipe'
+    static goal = 'goal'
 }
 
 // Pipe directions

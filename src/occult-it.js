@@ -13,7 +13,7 @@ export class OccultIt {
     gameContainer
     pipe
     players
-    console
+    theConsole
 
     constructor(engine) {
         this.engine = engine
@@ -36,18 +36,19 @@ export class OccultIt {
         this.gameContainer.scale.set(destinationTileSize.width, destinationTileSize.height)
         this.engine.stage.addChild(this.gameContainer)
 
-        this.console = new Console(new Vector2(pipesGridWidth /2 - 1, pipesGridHeight / 2 - 1))
-        state.console = this.console.state
+        this.theConsole = new Console(new Vector2(pipesGridWidth /2 - 1, pipesGridHeight / 2 - 1))
+        state.console = this.theConsole.state
 
 
         let networkId = getNetworkId()
         while (!networkId) {
             console.log("Waiting 250ms for networkId")
-            sleep(250)
-            networkId = getNetworkId()
+            setTimeout(() => networkId = getNetworkId(), 250)
+            //networkId = getNetworkId()
         }
 
         if (isHost()) {
+            console.log("I am the host")
             state.tiles = makePipes()
             //debugPipes()
     
@@ -59,11 +60,12 @@ export class OccultIt {
                 state: state
               })
         }
+        console.log("Player count: ", this.players.length)
     }
 
     addSprites() {
-        this.gameContainer.addChild(this.console.sprite)
-        this.gameContainer.addChild(this.console.progressBar)
+        this.gameContainer.addChild(this.theConsole.sprite)
+        this.gameContainer.addChild(this.theConsole.progressBar)
 
         addPipes(this.gameContainer)
 
@@ -82,7 +84,7 @@ export class OccultIt {
             player.update(timeDelta, this.gameContainer)
         }
 
-        this.console.update()
+        this.theConsole.update()
 
         if (isHost() 
             && Math.random() < 0.01) {
@@ -100,28 +102,30 @@ export class OccultIt {
 
     updateNetworkInput() {
         if (inState.length > 0) {
-            const aNewState = inState[0]
+            const aNewState = inState.shift()
 
+            console.log("Got state", aNewState)
             if (aNewState.command == NetCommandId.game) {
                 while (this.gameContainer.children.length > 0) {
                     this.gameContainer.removeChild(this.gameContainer.children[0])
                 }
+                console.log("Cleared container")
                 this.players = []
-                this.spawnSelf()
                 state.tiles = aNewState.state.tiles
                 state.players = aNewState.state.players
                 state.console = aNewState.state.console
-                this.console.setState(state.console)
+                const localPlayer = this.spawnSelf()
+                this.theConsole.setState(state.console)
 
                 state.players.forEach(playerState => {
                     this.players.push(Player.spawn(this.gameContainer, this.engine.audio, playerState.id))
                 });
 
                 this.addSprites()
-                setOutState({
-                    command: NetCommandId.player,
-                    movement: this.player.movement
-                })
+                // setOutState({
+                //     command: NetCommandId.player,
+                //     movement: localPlayer.movement
+                // })
             } else if (this.tiles) {
                 if (aNewState.command == NetCommandId.player) {
                     const updatePlayer = this.players.find(p => p.movement.id == aNewState.movement.id)
@@ -137,12 +141,13 @@ export class OccultIt {
                     updatePipeState(aNewState.pipe, this.gameContainer)
                 }
             }
-            inState.shift()
         }
     }
 
     spawnSelf() {
-        this.players.push(Player.spawn(this.gameContainer, this.engine.audio, getNetworkId()))
-        state.players.push(this.players[this.players.length - 1])
+        const newPlayer = Player.spawn(this.gameContainer, this.engine.audio, getNetworkId())
+        this.players.push(newPlayer)
+        state.players.push(newPlayer.movement)
+        return newPlayer
     }
 }

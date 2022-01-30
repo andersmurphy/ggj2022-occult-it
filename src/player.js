@@ -216,9 +216,10 @@ export class Player {
                     pos: spawnPos,
                     vel: new Vector2(),
                 }
-                return new Player(movement, true, container, audio)
+                return new Player(movement, id == getNetworkId(), container, audio)
             }
         }
+        console.log("Failed to spawn")
     }
 
     static addAssets(loader) {
