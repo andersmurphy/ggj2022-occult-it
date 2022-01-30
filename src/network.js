@@ -9,7 +9,7 @@ let hostId = 'occult-6-jock'
 let peer = new Peer(hostId)
 let connections = new Set()
 // Latest outState stored for new Clients
-let outState = null
+let outState = {}
 
 export class NetCommandId {
   static game = new NetCommandId('game')
