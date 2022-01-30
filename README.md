@@ -7,7 +7,7 @@ https://andersmurphy.github.io/ggj2022-occult-it/
 ## Setup
 
 ```
-yarn add --dev parcel
+yarn install
 ```
 
 ## Dev server
