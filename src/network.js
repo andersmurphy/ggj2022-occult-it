@@ -2,7 +2,7 @@ import Peer from 'peerjs'
 import state from './state'
 
 let peer = null
-let hostId = 'occult-77-norgg-2'
+let hostId = 'occult-77'
 
 export class NetCommandId {
   static game = 'game'
