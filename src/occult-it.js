@@ -7,6 +7,7 @@ import renderState from './render-state.js'
 import { Console } from './console.js'
 import { getNetworkId, inState, isHost, NetCommandId, setOutState } from './network.js'
 import { addWalls, loadWWallSprites } from './walls.js'
+import { addFloorAssets, addFloorSprites } from './floor.js'
 
 export class OccultIt {
     engine
@@ -27,6 +28,7 @@ export class OccultIt {
         Console.addAssets(loader)
         addPipeAssets(loader)
         loadWWallSprites(loader)
+        addFloorAssets(loader)
         return loader
     }
 
@@ -82,6 +84,7 @@ export class OccultIt {
     }
 
     addSprites() {
+        addFloorSprites(this.gameContainer)
         this.gameContainer.addChild(this.theConsole.sprite)
         this.gameContainer.addChild(this.theConsole.progressBar)
 
