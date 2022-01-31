@@ -51,7 +51,7 @@ peer.on('error', function(err) {
           inState.push(data)
         })
       })
-    }, 2000)
+    }, 1000)
 })
 
 // HOST CODE
