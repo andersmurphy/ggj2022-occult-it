@@ -11,6 +11,7 @@ export function addFloorSprites(container) {
     const tiledFloor = PIXI.TilingSprite.from(floorTexture, container.width, container.height)
 
     container.addChild(tiledFloor)
-    tiledFloor.tileScale.x = 1 / floorTexture.width * 2
-    tiledFloor.tileScale.y = 1 / floorTexture.height * 2
+    tiledFloor.tileScale.x = 1 / floorTexture.width * 4
+    tiledFloor.tileScale.y = 1 / floorTexture.height * 4
+    tiledFloor.alpha = 0.5
 }
