@@ -5,7 +5,7 @@ import state from './state.js'
 import { Vector2 } from './vector2.js'
 import renderState from './render-state.js'
 import { Console } from './console.js'
-import { getNetworkId, inState, isHost, NetCommandId, setOutState } from './network.js'
+import { getNetworkId, inState, singlePlayer, isHost, NetCommandId, setOutState } from './network.js'
 import { addWalls, loadWWallSprites } from './walls.js'
 
 export class OccultIt {
@@ -43,7 +43,11 @@ export class OccultIt {
         this.theConsole = new Console(new Vector2(pipesGridWidth /2 - 1, pipesGridHeight / 2 - 1))
         state.console = this.theConsole.state
 
-        this.continueCreate(250)
+        if (singlePlayer()) {
+            this.finishCreate()
+        } else {
+            this.continueCreate(250)
+        }
     }
 
     continueCreate(timeout) {
@@ -56,7 +60,7 @@ export class OccultIt {
                 if (networkId) {
                     this.finishCreate()
                 } else {
-                    this.continueCreate(timeout * 2)
+                    this.continueCreate(timeout * 1.3)
                 }
             }, timeout)
         } else {
@@ -65,7 +69,12 @@ export class OccultIt {
     }
 
     finishCreate() {
-        if (isHost()) {
+        if (singlePlayer()) {
+            console.log("Single player game")
+            state.tiles = makePipes()
+            this.spawnSelf()
+            this.addSprites()
+        } else if (isHost()) {
             console.log("I am the host")
             state.tiles = makePipes()
             //debugPipes()
