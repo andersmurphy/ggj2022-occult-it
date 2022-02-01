@@ -14,6 +14,7 @@ let connections = new Set()
 
 // Queue of inState
 export const inState = []
+let outState = {}
 
 export const getNetworkId = () => peer ? peer.id : null;
 
@@ -36,7 +37,6 @@ export function connect() {
 
   peer = new Peer(hostId)
   // Latest outState stored for new Clients
-  let outState = {}
 
   // CLIENT CODE
   // On failing to become the Host a peer becomes a Client
