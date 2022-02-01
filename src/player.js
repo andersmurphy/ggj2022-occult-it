@@ -14,6 +14,7 @@ const timerSprites = [
     require('../images/Timer3.png'),
     require('../images/Timer4.png'),
 ] 
+const selectionTexture = require('../images/Selection.png')
 const breakDuration = 1200  // milliseconds
 const fixDuration = 2400  // milliseconds
 const speed = 0.2 // In tiles per frame
@@ -24,6 +25,7 @@ export class Player {
     fixing
     movement
     audio
+    selectionSprite
 
     constructor(movement, isLocal, container, audio) {
         this.audio = audio
@@ -42,6 +44,9 @@ export class Player {
         this.fixing = null
 
         if (this.isLocal) {
+            this.selectionSprite = PIXI.Sprite.from('Selection.png')
+            this.selectionSprite.scale.set(1 / 80, 1 / 80)
+
             const wKey = keyboard(['w', 'W', 'ArrowUp'])
             wKey.press = () =>  this.up = true
             wKey.release = () => this.up = false
@@ -73,7 +78,7 @@ export class Player {
             } else if (this.fixing) {
                 this.updateFixing(timeDelta, container)
             } else {
-                this.updateInput()
+                this.updateInput(container)
             }
         }
         this.updateSprite()
@@ -94,7 +99,7 @@ export class Player {
         }
     }
 
-    updateInput() {
+    updateInput(container) {
         this.movement.vel.set(0, 0)
         if (this.up) {
             this.movement.vel.y -= speed
@@ -109,7 +114,7 @@ export class Player {
             this.movement.vel.x += speed
         }
 
-        this.updateInteracting()
+        this.updateInteracting(container)
 
         const nextPos = this.movement.pos.clone()
 
@@ -163,7 +168,7 @@ export class Player {
         }
     }
 
-    updateInteracting() {
+    updateInteracting(container) {
         if (this.movement.vel.x == 0 && this.movement.vel.y == 0) {
             return
         }
@@ -177,9 +182,9 @@ export class Player {
         let tile = state.tiles[interactionPoint.x][interactionPoint.y]
 
         if (tile.type == Type.pipe) {
-            this.startInteracting(tile, interactionPoint)
+            this.startInteracting(tile, interactionPoint, container)
         } else {
-            this.stopInteracting()
+            this.stopInteracting(container)
         }
     }
 
@@ -236,28 +241,27 @@ export class Player {
 
             loader.add(name, timerSprite)
         }
+        loader.add('Selection.png', selectionTexture)
     }
 
-    startInteracting(tile, point) {
-        this.stopInteracting()
+    startInteracting(tile, point, container) {
+        this.stopInteracting(container)
         this.interacting = { 
             tile,
             point
         }
-        const sprite = renderState.pipes[point.x][point.y].pipeSprite
-        sprite.tint = 0xff00ff
+        container.addChild(this.selectionSprite)
+        this.selectionSprite.x = point.x
+        this.selectionSprite.y = point.y
     }
 
     isInteracting() {
         return this.interacting && !(this.movement.vel.x == 0 && this.movement.vel.y == 0)
     }
 
-    stopInteracting() {
+    stopInteracting(container) {
         if (this.interacting) {
-            const point = this.interacting.point
-            const sprite = renderState.pipes[point.x][point.y].pipeSprite
-
-            sprite.tint = 0xffffff
+            container.removeChild(this.selectionSprite)
             this.interacting = null
         }
     }
@@ -269,7 +273,6 @@ export class Player {
                 const point = this.interacting.point
 
                 this.startBreakPipe(point, container)
-                this.stopInteracting()
             }
     }
 
@@ -290,6 +293,7 @@ export class Player {
         container.removeChild(this.breaking.sprite)
         breakPipe(point, container)
         this.breaking = null
+        this.startInteracting(state.tiles[point.x][point.y], point, container)
     }
 
     attemptToFix(container) {
@@ -299,7 +303,6 @@ export class Player {
                 const point = this.interacting.point
 
                 this.startFixPipe(point, container)
-                this.stopInteracting()
             }
     }
 
@@ -345,6 +348,7 @@ export class Player {
         container.removeChild(this.fixing.sprite)
         fixPipe(point, container)
         this.fixing = null
+        this.startInteracting(state.tiles[point.x][point.y], point, container)
     }
 
     createTimerSprite(name, point, scale = 20) {
