@@ -14,7 +14,14 @@ const PipeNSEW = require('../images/PipeNSEW.png')
 const PipeNW = require('../images/PipeNW.png')
 const PipeSE = require('../images/PipeSE.png')
 const PipeSW = require('../images/PipeSW.png')
-const BrokenPipeOverlay = require('../images/BrokenPipeOverlay.png')
+const PipeBreakNS = require('../images/PipeBreakNS.png')
+const PipeBreakEW = require('../images/PipeBreakEW.png')
+const PipeBreakNE = require('../images/PipeBreakNE.png')
+const PipeBreakNSEW = require('../images/PipeBreakNSEW.png')
+const PipeBreakNW = require('../images/PipeBreakNW.png')
+const PipeBreakSE = require('../images/PipeBreakSE.png')
+const PipeBreakSW = require('../images/PipeBreakSW.png')
+
 
 // Tile types
 export class Type {
@@ -42,7 +49,14 @@ export function addPipeAssets(loader) {
     loader.add('PipeNW.png', PipeNW)
     loader.add('PipeSE.png', PipeSE)
     loader.add('PipeSW.png', PipeSW)
-    loader.add('BrokenPipeOverlay.png', BrokenPipeOverlay)
+
+    loader.add('PipeBreakNS.png', PipeBreakNS)
+    loader.add('PipeBreakEW.png', PipeBreakEW)
+    loader.add('PipeBreakNE.png', PipeBreakNE)
+    loader.add('PipeBreakNSEW.png', PipeBreakNSEW)
+    loader.add('PipeBreakNW.png', PipeBreakNW)
+    loader.add('PipeBreakSE.png', PipeBreakSE)
+    loader.add('PipeBreakSW.png', PipeBreakSW)
 }
 
 export function makePipes() {
@@ -349,26 +363,30 @@ export function updatePipeState(netPipeState, container) {
     state.tiles[point.x][point.y].pipe = netPipeState.state
 
     if (netPipeState.state.isBroken) {
-        const sprite = PIXI.Sprite.from('BrokenPipeOverlay.png')
+        const sprite = brokenPipeSprite(netPipeState.state.dir)
 
         pipeRenderState.breakSprite = sprite
         container.addChild(sprite)
+        container.removeChild(renderState.pipes[point.x][point.y].pipeSprite)
         sprite.x = point.x
         sprite.y = point.y
         sprite.scale.set(1 / 80, 1 / 80)    
     } else {
         container.removeChild(pipeRenderState.breakSprite)
         pipeRenderState.breakSprite = null
+        container.addChild(renderState.pipes[point.x][point.y].pipeSprite)
     }
 }
 
 export function breakPipe(point, container) {
-    const sprite = PIXI.Sprite.from('BrokenPipeOverlay.png')
-    renderState.pipes[point.x][point.y].breakSprite = sprite
+    const pipeState = state.tiles[point.x][point.y].pipe
+    const sprite = brokenPipeSprite(pipeState.dir)
 
-    state.tiles[point.x][point.y].pipe.isBroken = true
+    renderState.pipes[point.x][point.y].breakSprite = sprite
+    pipeState.isBroken = true
 
     container.addChild(sprite)
+    container.removeChild(renderState.pipes[point.x][point.y].pipeSprite)
     sprite.x = point.x
     sprite.y = point.y
     sprite.scale.set(1 / 80, 1 / 80)
@@ -377,15 +395,33 @@ export function breakPipe(point, container) {
         command: NetCommandId.pipe,
         pipe: {
             point,
-            state: state.tiles[point.x][point.y].pipe
+            state: pipeState
         }
     })
+}
+
+function brokenPipeSprite(pipeDir) {
+    let sprite = undefined
+
+    if (pipeDir === PipeDir.leftRight) sprite = PIXI.Sprite.from('PipeBreakEW.png')
+    else if (pipeDir === PipeDir.upDown) sprite = PIXI.Sprite.from('PipeBreakNS.png')
+    else if (pipeDir === PipeDir.leftUp) sprite = PIXI.Sprite.from('PipeBreakNW.png')
+    else if (pipeDir === PipeDir.leftDown) sprite = PIXI.Sprite.from('PipeBreakSW.png')
+    else if (pipeDir === PipeDir.upRight) sprite = PIXI.Sprite.from('PipeBreakNE.png')
+    else if (pipeDir === PipeDir.rightDown) sprite = PIXI.Sprite.from('PipeBreakSE.png')
+    else if (pipeDir === PipeDir.bridge) sprite = PIXI.Sprite.from('PipeBreakNSEW.png')
+
+    if (sprite) {
+        sprite.scale.set(1 / 80, 1 / 80)
+    }
+    return sprite
 }
 
 export function fixPipe(point, container) {
     const sprite = renderState.pipes[point.x][point.y].breakSprite
 
     container.removeChild(sprite)
+    container.addChild(renderState.pipes[point.x][point.y].pipeSprite)
 
     renderState.pipes[point.x][point.y].breakSprite = null
     state.tiles[point.x][point.y].pipe.isBroken = false
