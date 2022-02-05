@@ -320,7 +320,7 @@ export function addPipes(container) {
 
             if (tile.type === Type.pipe) {
                 sprite = new PIXI.Sprite()
-                sprite.texture = updatePipeTexture(tile.pipe)
+                sprite.texture = getPipeTexture(tile.pipe)
             }
 
             const floodGraphic = new PIXI.Graphics()
@@ -353,7 +353,7 @@ export function updatePipeState(netPipeState, container) {
     const pipeRenderState = renderState.pipes[point.x][point.y]
     
     state.tiles[point.x][point.y].pipe = netPipeState.state
-    pipeRenderState.pipeSprite.texture = updatePipeTexture(netPipeState.state)
+    pipeRenderState.pipeSprite.texture = getPipeTexture(netPipeState.state)
 }
 
 export function breakPipe(point, container) {
@@ -361,7 +361,7 @@ export function breakPipe(point, container) {
     const pipeRenderState = renderState.pipes[point.x][point.y]
 
     pipeState.isBroken = true
-    pipeRenderState.pipeSprite.texture = updatePipeTexture(pipeState)
+    pipeRenderState.pipeSprite.texture = getPipeTexture(pipeState)
 
     setOutState({
         command: NetCommandId.pipe,
@@ -372,7 +372,7 @@ export function breakPipe(point, container) {
     })
 }
 
-function updatePipeTexture(pipeState) {
+function getPipeTexture(pipeState) {
     let texture = undefined
 
     const broken = pipeState.isBroken
@@ -403,7 +403,7 @@ export function fixPipe(point, container) {
     const pipeRenderState = renderState.pipes[point.x][point.y]
 
     pipeState.isBroken = false
-    pipeRenderState.pipeSprite.texture = updatePipeTexture(pipeState)
+    pipeRenderState.pipeSprite.texture = getPipeTexture(pipeState)
 
     setOutState({
         command: NetCommandId.pipe,
