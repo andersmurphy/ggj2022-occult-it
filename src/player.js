@@ -77,7 +77,7 @@ export class Player {
             const rKey = keyboard(['r', 'R', ' ', 'p', 'P'])
             rKey.press = () => this.attemptToBreak(container)
 
-            const fKey = keyboard(['f', 'F', 'l', 'L'])
+            const fKey = keyboard(['f', 'F', 'l', 'L', 'Control'])
             fKey.press = () => this.attemptToFix(container)
         }
     }

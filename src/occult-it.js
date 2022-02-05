@@ -5,7 +5,7 @@ import state from './state.js'
 import { Vector2 } from './vector2.js'
 import renderState from './render-state.js'
 import { Console } from './console.js'
-import { getNetworkId, inState, singlePlayer, isHost, NetCommandId, setOutState } from './network.js'
+import { getNetworkId, inState, singlePlayer, isConnected, isHost, NetCommandId, setOutState } from './network.js'
 import { addWalls, loadWWallSprites } from './walls.js'
 import { addFloorAssets, addFloorSprites } from './floor.js'
 
@@ -45,28 +45,86 @@ export class OccultIt {
         this.theConsole = new Console(new Vector2(pipesGridWidth /2 - 1, pipesGridHeight / 2 - 1))
         state.console = this.theConsole.state
 
-        if (singlePlayer()) {
+        this.menu()
+    }
+
+    menu() {
+        let menuContainer = this.engine.makeContainer()
+        this.gameContainer.addChild(menuContainer)
+
+        let titleText = new PIXI.Text('OccuIT', { fill: 0xffaaaa })
+        titleText.scale.set(0.2, 0.2)
+        titleText.position.set(pipesGridWidth / 2, pipesGridHeight / 2)
+        titleText.anchor.set(0.5, 0.5)
+        titleText.resolution = 4
+        menuContainer.addChild(titleText)
+
+        let controlsText = new PIXI.Text(`Controls:
+WASD/Arrows: Movement
+R/Space: Break
+F/Ctrl: Fix
+        `, { fill: 0xffffff })
+        controlsText.scale.set(0.05, 0.05)
+        controlsText.position.set(1, 1)
+        controlsText.anchor.set(0, 0)
+        controlsText.resolution = 2
+        menuContainer.addChild(controlsText)
+
+        let spBorder = new PIXI.Graphics()
+        spBorder.lineStyle({ color: 0xffaaaa, width: 0.2})
+        spBorder.beginFill(0x222222)
+        spBorder.drawRect(pipesGridWidth / 2 - 10, pipesGridHeight / 4 - 2, 20, 4)
+        spBorder.interactive = true
+        menuContainer.addChild(spBorder)
+
+        let spText = new PIXI.Text('Solo', { fill: 0xffaaaa })
+        spText.scale.set(0.08, 0.08)
+        spText.position.set(pipesGridWidth / 2, pipesGridHeight / 4)
+        spText.anchor.set(0.5, 0.5)
+        spText.resolution = 4
+        menuContainer.addChild(spText)
+
+        let mpBorder = new PIXI.Graphics()
+        mpBorder.lineStyle({ color: 0xffaaaa, width: 0.2})
+        mpBorder.beginFill(0x222222)
+        mpBorder.drawRect(pipesGridWidth / 2 - 10, 3 * pipesGridHeight / 4 - 2, 20, 4)
+        mpBorder.interactive = true
+        menuContainer.addChild(mpBorder)
+
+        let mpText = new PIXI.Text('Multiplayer', { fill: 0xffaaaa })
+        mpText.scale.set(0.08, 0.08)
+        mpText.position.set(pipesGridWidth / 2, 3 * pipesGridHeight / 4)
+        mpText.anchor.set(0.5, 0.5)
+        mpText.resolution = 4
+        menuContainer.addChild(mpText)
+
+        spBorder.on('mousedown', (event) => {
+            this.gameContainer.removeChild(menuContainer)
             this.finishCreate()
-        } else {
+        })
+
+        mpBorder.on('mousedown', () => {
+            this.gameContainer.removeChild(menuContainer)
+            this.connectingText = new PIXI.Text('Connecting...', { fill: 0xffaaaa })
+            this.connectingText.scale.set(0.08, 0.08)
+            this.connectingText.position.set(pipesGridWidth / 2, pipesGridHeight / 2)
+            this.connectingText.anchor.set(0.5, 0.5)
+            this.gameContainer.addChild(this.connectingText)
+            connect()
             this.continueCreate(250)
-        }
+        })
     }
 
     continueCreate(timeout) {
-        let networkId = getNetworkId()
-
-        if (!networkId) {
+        if (!isConnected()) {
             console.log(`Waiting ${timeout}ms for networkId`)
-            setTimeout(() => {
-                networkId = getNetworkId()
-                if (networkId) {
-                    this.finishCreate()
-                } else {
-                    this.continueCreate(timeout * 1.3)
-                }
-            }, timeout)
+            setTimeout(() => this.continueCreate(timeout * 1.3), timeout)
         } else {
-            this.finishCreate()
+            this.gameContainer.removeChild(this.connectingText)
+            if (isHost()) {
+                console.log('Is host, creating own world')
+                this.finishCreate()
+            }
         }
     }
 
@@ -122,15 +180,19 @@ export class OccultIt {
 
         if (this.theConsole.won && !this.madeText) {
             this.madeText = true
-            let text = new PIXI.Text('THANKYOU HUMANS COMPUTATION COMPLETE');
-            this.gameContainer.addChild(text)
+            let text = new PIXI.Text('THANKYOU HUMANS COMPUTATION COMPLETE', { fill: 0xffaaaa })
+            text.alpha = 0.8
             text.scale.set(0.08, 0.08)
             text.position.set(5, 10)
+            text.resolution = 4
+            this.gameContainer.addChild(text)
         } else if (this.theConsole.lost && !this.madeText) {
             this.madeText = true
-            let text = new PIXI.Text('ERROR COMPUTATION FAILED: NOT ENOUGH FLUID');
+            let text = new PIXI.Text('ERROR COMPUTATION FAILED: NOT ENOUGH FLUID', { fill: 0xffaaaa })
+            text.alpha = 0.8
             text.scale.set(0.08, 0.08)
             text.position.set(5, 10)
+            text.resolution = 4
             this.gameContainer.addChild(text)
         }
 
