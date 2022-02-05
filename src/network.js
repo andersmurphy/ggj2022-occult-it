@@ -56,9 +56,6 @@ export function connect() {
         connections.add(conn)
         conn.on('open', () => {
           console.log("Peer opened as client")
-          // let button = document.getElementById('online-button')
-          // button.disabled = true
-          // button.innerText = 'Connected as client'
           conn.on('data', (data) => {
             // Add to clients inState
             //console.log("Got data: ", data)
@@ -73,9 +70,6 @@ export function connect() {
 
     if (isHost()) {
       console.log('Peer opened as host')
-      // let button = document.getElementById('online-button')
-      // button.disabled = true
-      // button.innerText = 'Listening as host'
     } else {
       console.error('Unexpectedly had host peer opened as client')
     }

@@ -184,6 +184,7 @@ F/Ctrl: Fix
             text.alpha = 0.8
             text.scale.set(0.08, 0.08)
             text.position.set(5, 10)
+            text.resolution = 4
             this.gameContainer.addChild(text)
         } else if (this.theConsole.lost && !this.madeText) {
             this.madeText = true
@@ -191,6 +192,7 @@ F/Ctrl: Fix
             text.alpha = 0.8
             text.scale.set(0.08, 0.08)
             text.position.set(5, 10)
+            text.resolution = 4
             this.gameContainer.addChild(text)
         }
 
