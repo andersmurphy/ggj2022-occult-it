@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js'
 import {Vector2} from './vector2'
 import keyboard from './keyboard'
-import { pipesGridWidth, pipesGridHeight, Type, breakPipe, fixPipe } from './pipes'
+import { pipesGridWidth, pipesGridHeight, Type, breakPipe, fixPipe, maxFlooding } from './pipes'
 import state from './state'
 import renderState from './render-state'
 import { setOutState, NetCommandId, getNetworkId } from './network'
@@ -25,7 +25,7 @@ const interactBreakTexture = require('../images/InteractBreak.png')
 const interactFixTexture = require('../images/InteractFix.png')
 const breakDuration = 500  // milliseconds
 const fixDuration = 1000  // milliseconds
-const speed = 0.2 // In tiles per frame
+const speed = 0.15 // In tiles per frame
 
 export class Player {
     interacting
@@ -111,19 +111,30 @@ export class Player {
     }
 
     updateInput(container) {
-        this.movement.vel.set(0, 0)
+
+        let currentTile = state.tiles[Math.floor(this.movement.pos.x)][Math.floor(this.movement.pos.y)]
+
+        let vel = new Vector2(0, 0)
         if (this.up) {
-            this.movement.vel.y -= speed
+            vel.y -= 1
         }
         if (this.down) {
-            this.movement.vel.y += speed
+            vel.y += 1
         }
         if (this.left) {
-            this.movement.vel.x -= speed
+            vel.x -= 1
         }
         if (this.right) {
-            this.movement.vel.x += speed
+            vel.x += 1
         }
+
+        vel = vel.normalize()
+        vel = vel.scale(speed)
+
+        const slowdown = Math.max(1 - (currentTile.flooding / maxFlooding), 1/3)
+        vel = vel.scale(slowdown)
+
+        this.movement.vel.set(vel.x, vel.y)
 
         this.updateInteracting(container)
 
