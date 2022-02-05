@@ -122,13 +122,15 @@ export class OccultIt {
 
         if (this.theConsole.won && !this.madeText) {
             this.madeText = true
-            let text = new PIXI.Text('THANKYOU HUMANS COMPUTATION COMPLETE');
-            this.gameContainer.addChild(text)
+            let text = new PIXI.Text('THANKYOU HUMANS COMPUTATION COMPLETE', { fill: 0xffaaaa })
+            text.alpha = 0.8
             text.scale.set(0.08, 0.08)
             text.position.set(5, 10)
+            this.gameContainer.addChild(text)
         } else if (this.theConsole.lost && !this.madeText) {
             this.madeText = true
-            let text = new PIXI.Text('ERROR COMPUTATION FAILED: NOT ENOUGH FLUID');
+            let text = new PIXI.Text('ERROR COMPUTATION FAILED: NOT ENOUGH FLUID', { fill: 0xffaaaa })
+            text.alpha = 0.8
             text.scale.set(0.08, 0.08)
             text.position.set(5, 10)
             this.gameContainer.addChild(text)
