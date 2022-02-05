@@ -23,8 +23,8 @@ const breakTimerSprites = [
 ] 
 const interactBreakTexture = require('../images/InteractBreak.png')
 const interactFixTexture = require('../images/InteractFix.png')
-const breakDuration = 1200  // milliseconds
-const fixDuration = 2400  // milliseconds
+const breakDuration = 500  // milliseconds
+const fixDuration = 1000  // milliseconds
 const speed = 0.2 // In tiles per frame
 
 export class Player {
@@ -277,8 +277,9 @@ export class Player {
             interactSprite = this.interactBreakSprite
         }
         container.addChild(interactSprite)
-        interactSprite.x = point.x
-        interactSprite.y = point.y
+        interactSprite.anchor.set(0.5, 0.5)
+        interactSprite.x = point.x + 0.5
+        interactSprite.y = point.y + 0.5
     }
 
     isInteracting() {
@@ -304,6 +305,10 @@ export class Player {
     }
 
     startBreakPipe(point, container) {
+        if (this.breaking || this.fixing) {
+            return
+        }
+
         const sprite = this.createTimerSprite('BreakTimer4.png', point)
 
         this.breaking = {
@@ -334,6 +339,10 @@ export class Player {
     }
 
     startFixPipe(point, container) {
+        if (this.breaking || this.fixing) {
+            return
+        }
+
         const sprite = this.createTimerSprite('FixTimer0.png', point)
 
         this.fixing = {
@@ -380,11 +389,11 @@ export class Player {
         this.startInteracting(state.tiles[point.x][point.y], point, container)
     }
 
-    createTimerSprite(name, point, scale = 20) {
+    createTimerSprite(name, point, scale = 40) {
         const sprite = PIXI.Sprite.from(name)
 
-        sprite.x = point.x
-        sprite.y = point.y
+        sprite.position.set(point.x + 0.5, point.y + 0.5)
+        sprite.anchor.set(0.5, 0.5)
         sprite.scale.set(1 / scale, 1 / scale)
 
         return sprite
