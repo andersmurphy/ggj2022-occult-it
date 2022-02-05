@@ -36,7 +36,7 @@ export class OccultIt {
         window.gamestate = state
 
         renderState.pipes = Array(pipesGridWidth).fill(null).map(
-            () => Array(pipesGridHeight).fill(null).map(() => ({pipeSprite: null, breakSprite: null, floodGraphic: null})))
+            () => Array(pipesGridHeight).fill(null).map(() => ({pipeSprite: null, floodGraphic: null})))
 
         this.gameContainer = this.engine.makeContainer()
         this.gameContainer.scale.set(destinationTileSize.width, destinationTileSize.height)

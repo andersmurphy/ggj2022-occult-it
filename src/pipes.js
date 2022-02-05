@@ -318,18 +318,10 @@ export function addPipes(container) {
             const tile = state.tiles[x][y]
             let sprite = undefined
 
-            if (tile.type === Type.empty) { 
-            } else if (tile.type === Type.pipe) {
-                if (tile.pipe.dir === PipeDir.leftRight) sprite = PIXI.Sprite.from('PipeEW.png')
-                else if (tile.pipe.dir === PipeDir.upDown) sprite = PIXI.Sprite.from('PipeNS.png')
-                else if (tile.pipe.dir === PipeDir.leftUp) sprite = PIXI.Sprite.from('PipeNW.png')
-                else if (tile.pipe.dir === PipeDir.leftDown) sprite = PIXI.Sprite.from('PipeSW.png')
-                else if (tile.pipe.dir === PipeDir.upRight) sprite = PIXI.Sprite.from('PipeNE.png')
-                else if (tile.pipe.dir === PipeDir.rightDown) sprite = PIXI.Sprite.from('PipeSE.png')
-                else if (tile.pipe.dir === PipeDir.bridge) sprite = PIXI.Sprite.from('PipeNSEW.png')
-                else { }
+            if (tile.type === Type.pipe) {
+                sprite = new PIXI.Sprite()
+                sprite.texture = getPipeTexture(tile.pipe)
             }
-            else if (tile.type === Type.goal) { /* pre.append('*') */ }
 
             const floodGraphic = new PIXI.Graphics()
             // floodGraphic.cacheAsBitmap = true
@@ -361,35 +353,15 @@ export function updatePipeState(netPipeState, container) {
     const pipeRenderState = renderState.pipes[point.x][point.y]
     
     state.tiles[point.x][point.y].pipe = netPipeState.state
-
-    if (netPipeState.state.isBroken) {
-        const sprite = brokenPipeSprite(netPipeState.state.dir)
-
-        pipeRenderState.breakSprite = sprite
-        container.addChild(sprite)
-        container.removeChild(renderState.pipes[point.x][point.y].pipeSprite)
-        sprite.x = point.x
-        sprite.y = point.y
-        sprite.scale.set(1 / 80, 1 / 80)    
-    } else {
-        container.removeChild(pipeRenderState.breakSprite)
-        pipeRenderState.breakSprite = null
-        container.addChild(renderState.pipes[point.x][point.y].pipeSprite)
-    }
+    pipeRenderState.pipeSprite.texture = getPipeTexture(netPipeState.state)
 }
 
 export function breakPipe(point, container) {
     const pipeState = state.tiles[point.x][point.y].pipe
-    const sprite = brokenPipeSprite(pipeState.dir)
+    const pipeRenderState = renderState.pipes[point.x][point.y]
 
-    renderState.pipes[point.x][point.y].breakSprite = sprite
     pipeState.isBroken = true
-
-    container.addChild(sprite)
-    container.removeChild(renderState.pipes[point.x][point.y].pipeSprite)
-    sprite.x = point.x
-    sprite.y = point.y
-    sprite.scale.set(1 / 80, 1 / 80)
+    pipeRenderState.pipeSprite.texture = getPipeTexture(pipeState)
 
     setOutState({
         command: NetCommandId.pipe,
@@ -400,31 +372,38 @@ export function breakPipe(point, container) {
     })
 }
 
-function brokenPipeSprite(pipeDir) {
-    let sprite = undefined
+function getPipeTexture(pipeState) {
+    let texture = undefined
 
-    if (pipeDir === PipeDir.leftRight) sprite = PIXI.Sprite.from('PipeBreakEW.png')
-    else if (pipeDir === PipeDir.upDown) sprite = PIXI.Sprite.from('PipeBreakNS.png')
-    else if (pipeDir === PipeDir.leftUp) sprite = PIXI.Sprite.from('PipeBreakNW.png')
-    else if (pipeDir === PipeDir.leftDown) sprite = PIXI.Sprite.from('PipeBreakSW.png')
-    else if (pipeDir === PipeDir.upRight) sprite = PIXI.Sprite.from('PipeBreakNE.png')
-    else if (pipeDir === PipeDir.rightDown) sprite = PIXI.Sprite.from('PipeBreakSE.png')
-    else if (pipeDir === PipeDir.bridge) sprite = PIXI.Sprite.from('PipeBreakNSEW.png')
+    const broken = pipeState.isBroken
+    const pipeDir = pipeState.dir
 
-    if (sprite) {
-        sprite.scale.set(1 / 80, 1 / 80)
+    if (broken) {
+        if (pipeDir === PipeDir.leftRight) texture = PIXI.Texture.from('PipeBreakEW.png')
+        else if (pipeDir === PipeDir.upDown) texture = PIXI.Texture.from('PipeBreakNS.png')
+        else if (pipeDir === PipeDir.leftUp) texture = PIXI.Texture.from('PipeBreakNW.png')
+        else if (pipeDir === PipeDir.leftDown) texture = PIXI.Texture.from('PipeBreakSW.png')
+        else if (pipeDir === PipeDir.upRight) texture = PIXI.Texture.from('PipeBreakNE.png')
+        else if (pipeDir === PipeDir.rightDown) texture = PIXI.Texture.from('PipeBreakSE.png')
+        else if (pipeDir === PipeDir.bridge) texture = PIXI.Texture.from('PipeBreakNSEW.png')
+    } else {
+        if (pipeDir === PipeDir.leftRight) texture = PIXI.Texture.from('PipeEW.png')
+        else if (pipeDir === PipeDir.upDown) texture = PIXI.Texture.from('PipeNS.png')
+        else if (pipeDir === PipeDir.leftUp) texture = PIXI.Texture.from('PipeNW.png')
+        else if (pipeDir === PipeDir.leftDown) texture = PIXI.Texture.from('PipeSW.png')
+        else if (pipeDir === PipeDir.upRight) texture = PIXI.Texture.from('PipeNE.png')
+        else if (pipeDir === PipeDir.rightDown) texture = PIXI.Texture.from('PipeSE.png')
+        else if (pipeDir === PipeDir.bridge) texture = PIXI.Texture.from('PipeNSEW.png')
     }
-    return sprite
+    return texture
 }
 
 export function fixPipe(point, container) {
-    const sprite = renderState.pipes[point.x][point.y].breakSprite
+    const pipeState = state.tiles[point.x][point.y].pipe
+    const pipeRenderState = renderState.pipes[point.x][point.y]
 
-    container.removeChild(sprite)
-    container.addChild(renderState.pipes[point.x][point.y].pipeSprite)
-
-    renderState.pipes[point.x][point.y].breakSprite = null
-    state.tiles[point.x][point.y].pipe.isBroken = false
+    pipeState.isBroken = false
+    pipeRenderState.pipeSprite.texture = getPipeTexture(pipeState)
 
     setOutState({
         command: NetCommandId.pipe,

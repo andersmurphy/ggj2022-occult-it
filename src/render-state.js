@@ -5,6 +5,6 @@ export default {
 /*
 pipe: {
     pipeSprite,
-    breakSprite
+    floodGraphic
 }
 */
