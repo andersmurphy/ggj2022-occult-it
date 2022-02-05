@@ -7,14 +7,22 @@ import renderState from './render-state'
 import { setOutState, NetCommandId, getNetworkId } from './network'
 
 const texture = require('../assets/Player.png')
-const timerSprites = [
-    require('../images/Timer0.png'),
-    require('../images/Timer1.png'),
-    require('../images/Timer2.png'),
-    require('../images/Timer3.png'),
-    require('../images/Timer4.png'),
+const fixTimerSprites = [
+    require('../images/FixTimer0.png'),
+    require('../images/FixTimer1.png'),
+    require('../images/FixTimer2.png'),
+    require('../images/FixTimer3.png'),
+    require('../images/FixTimer4.png'),
 ] 
-const selectionTexture = require('../images/Selection.png')
+const breakTimerSprites = [
+    require('../images/BreakTimer0.png'),
+    require('../images/BreakTimer1.png'),
+    require('../images/BreakTimer2.png'),
+    require('../images/BreakTimer3.png'),
+    require('../images/BreakTimer4.png'),
+] 
+const interactBreakTexture = require('../images/InteractBreak.png')
+const interactFixTexture = require('../images/InteractFix.png')
 const breakDuration = 1200  // milliseconds
 const fixDuration = 2400  // milliseconds
 const speed = 0.2 // In tiles per frame
@@ -25,7 +33,8 @@ export class Player {
     fixing
     movement
     audio
-    selectionSprite
+    interactBreakSprite
+    interactFixSprite
 
     constructor(movement, isLocal, container, audio) {
         this.audio = audio
@@ -44,8 +53,10 @@ export class Player {
         this.fixing = null
 
         if (this.isLocal) {
-            this.selectionSprite = PIXI.Sprite.from('Selection.png')
-            this.selectionSprite.scale.set(1 / 80, 1 / 80)
+            this.interactBreakSprite = PIXI.Sprite.from('InteractBreak.png')
+            this.interactBreakSprite.scale.set(1 / 80, 1 / 80)
+            this.interactFixSprite = PIXI.Sprite.from('InteractFix.png')
+            this.interactFixSprite.scale.set(1 / 80, 1 / 80)
 
             const wKey = keyboard(['w', 'W', 'ArrowUp'])
             wKey.press = () =>  this.up = true
@@ -189,26 +200,28 @@ export class Player {
     }
 
     updateBreaking(timeDelta, container) {
-        const quarterDuration = Math.floor(breakDuration / 4)
-        const currentQuarter = Math.floor(this.breaking.time / quarterDuration)
+        const timerPartCount = 5
+        const partDuration = Math.floor(breakDuration / timerPartCount)
+        const currentPart = Math.floor(this.breaking.time / partDuration)
 
         this.breaking.time += timeDelta
         if (this.breaking.time >= breakDuration) {
-            this.audio.play("break4")
             this.finishBreakPipe(container)
         } else {
-            const newQuarter = Math.floor(this.breaking.time / quarterDuration)
+            const newPart = Math.floor(this.breaking.time / partDuration)
 
-            if (newQuarter != currentQuarter) {
-                const name = `Timer${4 - newQuarter}.png`
+            if (newPart != currentPart) {
+                const name = `BreakTimer${timerPartCount - newPart}.png`
                 const sprite = this.createTimerSprite(name, this.breaking.point)
                 
                 container.removeChild(this.breaking.sprite)
                 this.breaking.sprite = sprite
                 container.addChild(sprite)
 
-                const audioName = `break${newQuarter}`
-                this.audio.play(audioName)
+                if (newPart >= 0) {
+                    const audioName = `break${newPart}`
+                    this.audio.play(audioName)
+                }
             }
         }
     }
@@ -235,13 +248,20 @@ export class Player {
 
     static addAssets(loader) {
         loader.add('player.png', texture)
-        for (let i = 0; i < timerSprites.length; i++) {
-            const timerSprite = timerSprites[i];
-            const name = `Timer${i}.png`
+        for (let i = 0; i < fixTimerSprites.length; i++) {
+            const timerSprite = fixTimerSprites[i];
+            const name = `FixTimer${i}.png`
 
             loader.add(name, timerSprite)
         }
-        loader.add('Selection.png', selectionTexture)
+        for (let i = 0; i < breakTimerSprites.length; i++) {
+            const timerSprite = breakTimerSprites[i];
+            const name = `BreakTimer${i}.png`
+
+            loader.add(name, timerSprite)
+        }
+        loader.add('InteractBreak.png', interactBreakTexture)
+        loader.add('InteractFix.png', interactFixTexture)
     }
 
     startInteracting(tile, point, container) {
@@ -250,9 +270,15 @@ export class Player {
             tile,
             point
         }
-        container.addChild(this.selectionSprite)
-        this.selectionSprite.x = point.x
-        this.selectionSprite.y = point.y
+        let interactSprite
+        if (tile.pipe.isBroken) {
+            interactSprite = this.interactFixSprite
+        } else {
+            interactSprite = this.interactBreakSprite
+        }
+        container.addChild(interactSprite)
+        interactSprite.x = point.x
+        interactSprite.y = point.y
     }
 
     isInteracting() {
@@ -261,7 +287,8 @@ export class Player {
 
     stopInteracting(container) {
         if (this.interacting) {
-            container.removeChild(this.selectionSprite)
+            container.removeChild(this.interactBreakSprite)
+            container.removeChild(this.interactFixSprite)
             this.interacting = null
         }
     }
@@ -277,7 +304,7 @@ export class Player {
     }
 
     startBreakPipe(point, container) {
-        const sprite = this.createTimerSprite('Timer4.png', point)
+        const sprite = this.createTimerSprite('BreakTimer4.png', point)
 
         this.breaking = {
             point,
@@ -307,7 +334,7 @@ export class Player {
     }
 
     startFixPipe(point, container) {
-        const sprite = this.createTimerSprite('Timer4.png', point)
+        const sprite = this.createTimerSprite('FixTimer0.png', point)
 
         this.fixing = {
             point,
@@ -318,26 +345,28 @@ export class Player {
     }
 
     updateFixing(timeDelta, container) {
-        const quarterDuration = Math.floor(fixDuration / 4)
-        const currentQuarter = Math.floor(this.fixing.time / quarterDuration)
+        const timerPartCount = 5
+        const partDuration = Math.floor(fixDuration / timerPartCount)
+        const currentPart = Math.floor(this.fixing.time / partDuration)
 
         this.fixing.time += timeDelta
         if (this.fixing.time >= fixDuration) {
-            this.audio.play("fix4")
             this.finishFixPipe(container)
         } else {
-            const newQuarter = Math.floor(this.fixing.time / quarterDuration)
+            const newPart = Math.floor(this.fixing.time / partDuration)
 
-            if (newQuarter != currentQuarter) {
-                const name = `Timer${4 - newQuarter}.png`
+            if (newPart != currentPart) {
+                const name = `FixTimer${newPart}.png`
                 const sprite = this.createTimerSprite(name, this.fixing.point)
 
                 container.removeChild(this.fixing.sprite)
                 this.fixing.sprite = sprite
                 container.addChild(sprite)
 
-                const audioName = `fix${newQuarter}`
-                this.audio.play(audioName)
+                if (newPart >= 0) {
+                    const audioName = `fix${newPart}`
+                    this.audio.play(audioName)
+                }
             }
         }
     }

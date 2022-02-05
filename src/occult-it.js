@@ -196,7 +196,7 @@ F/Ctrl: Fix
             this.gameContainer.addChild(text)
         }
 
-        if (isHost() 
+        if ((isHost() || singlePlayer())
             && Math.random() < 0.015) {
             // Break a random pipe
             const breakPos = new Vector2(1 + Math.random() * (pipesGridWidth - 3), 1 + Math.random() * (pipesGridHeight - 3))
