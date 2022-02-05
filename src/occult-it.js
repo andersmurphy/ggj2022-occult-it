@@ -5,7 +5,7 @@ import state from './state.js'
 import { Vector2 } from './vector2.js'
 import renderState from './render-state.js'
 import { Console } from './console.js'
-import { getNetworkId, inState, singlePlayer, isHost, NetCommandId, setOutState } from './network.js'
+import { getNetworkId, inState, singlePlayer, isConnected, isHost, NetCommandId, setOutState } from './network.js'
 import { addWalls, loadWWallSprites } from './walls.js'
 import { addFloorAssets, addFloorSprites } from './floor.js'
 
@@ -45,28 +45,55 @@ export class OccultIt {
         this.theConsole = new Console(new Vector2(pipesGridWidth /2 - 1, pipesGridHeight / 2 - 1))
         state.console = this.theConsole.state
 
-        if (singlePlayer()) {
+        let spText = new PIXI.Text('Solo', { fill: 0xffaaaa })
+        spText.scale.set(0.08, 0.08)
+        spText.position.set(pipesGridWidth / 2, pipesGridHeight / 4)
+        spText.anchor.set(0.5, 0.5)
+        spText.interactive = true
+        this.gameContainer.addChild(spText)
+
+        let mpText = new PIXI.Text('Multiplayer', { fill: 0xffaaaa })
+        mpText.scale.set(0.08, 0.08)
+        mpText.position.set(pipesGridWidth / 2, 3 * pipesGridHeight / 4)
+        mpText.anchor.set(0.5, 0.5)
+        mpText.interactive = true
+        this.gameContainer.addChild(mpText)
+
+        spText.on('mousedown', (event) => {
+            this.gameContainer.removeChild(spText)
+            this.gameContainer.removeChild(mpText)
+            this.finishCreate()
+        })
+
+        mpText.on('mousedown', () => {
+            this.gameContainer.removeChild(spText)
+            this.gameContainer.removeChild(mpText)
+            this.connectingText = new PIXI.Text('Connecting...', { fill: 0xffaaaa })
+            this.connectingText.scale.set(0.08, 0.08)
+            this.connectingText.position.set(pipesGridWidth / 2, pipesGridHeight / 2)
+            this.connectingText.anchor.set(0.5, 0.5)
+            this.gameContainer.addChild(this.connectingText)
+            connect()
+            this.continueCreate(250)
+        })
+
+        /*if (singlePlayer()) {
             this.finishCreate()
         } else {
             this.continueCreate(250)
-        }
+        }*/
     }
 
     continueCreate(timeout) {
-        let networkId = getNetworkId()
-
-        if (!networkId) {
+        if (!isConnected()) {
             console.log(`Waiting ${timeout}ms for networkId`)
-            setTimeout(() => {
-                networkId = getNetworkId()
-                if (networkId) {
-                    this.finishCreate()
-                } else {
-                    this.continueCreate(timeout * 1.3)
-                }
-            }, timeout)
+            setTimeout(() => this.continueCreate(timeout * 1.3), timeout)
         } else {
-            this.finishCreate()
+            this.gameContainer.removeChild(this.connectingText)
+            if (isHost()) {
+                console.log('Is host, creating own world')
+                this.finishCreate()
+            }
         }
     }
 

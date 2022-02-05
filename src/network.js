@@ -12,11 +12,15 @@ export class NetCommandId {
 
 let connections = new Set()
 
+let connected = false
+
 // Queue of inState
 export const inState = []
 let outState = {}
 
 export const getNetworkId = () => peer ? peer.id : null;
+
+export const isConnected = () => connected
 
 export const singlePlayer = () => peer == null
 
@@ -52,9 +56,9 @@ export function connect() {
         connections.add(conn)
         conn.on('open', () => {
           console.log("Peer opened as client")
-          let button = document.getElementById('online-button')
-          button.disabled = true
-          button.innerText = 'Connected as client'
+          // let button = document.getElementById('online-button')
+          // button.disabled = true
+          // button.innerText = 'Connected as client'
           conn.on('data', (data) => {
             // Add to clients inState
             //console.log("Got data: ", data)
@@ -65,11 +69,13 @@ export function connect() {
   })
 
   peer.on('open', (id) => {
+    connected = true
+
     if (isHost()) {
       console.log('Peer opened as host')
-      let button = document.getElementById('online-button')
-      button.disabled = true
-      button.innerText = 'Listening as host'
+      // let button = document.getElementById('online-button')
+      // button.disabled = true
+      // button.innerText = 'Listening as host'
     } else {
       console.error('Unexpectedly had host peer opened as client')
     }
