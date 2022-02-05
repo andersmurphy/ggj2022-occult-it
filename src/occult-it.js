@@ -59,6 +59,17 @@ export class OccultIt {
         titleText.resolution = 4
         menuContainer.addChild(titleText)
 
+        let controlsText = new PIXI.Text(`Controls:
+WASD/Arrows: Movement
+R/Space: Break
+F/Ctrl: Fix
+        `, { fill: 0xffffff })
+        controlsText.scale.set(0.05, 0.05)
+        controlsText.position.set(1, 1)
+        controlsText.anchor.set(0, 0)
+        controlsText.resolution = 2
+        menuContainer.addChild(controlsText)
+
         let spBorder = new PIXI.Graphics()
         spBorder.lineStyle({ color: 0xffaaaa, width: 0.2})
         spBorder.beginFill(0x222222)
