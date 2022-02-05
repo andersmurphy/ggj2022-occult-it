@@ -45,29 +45,55 @@ export class OccultIt {
         this.theConsole = new Console(new Vector2(pipesGridWidth /2 - 1, pipesGridHeight / 2 - 1))
         state.console = this.theConsole.state
 
+        this.menu()
+    }
+
+    menu() {
+        let menuContainer = this.engine.makeContainer()
+        this.gameContainer.addChild(menuContainer)
+
+        let titleText = new PIXI.Text('OccuIT', { fill: 0xffaaaa })
+        titleText.scale.set(0.2, 0.2)
+        titleText.position.set(pipesGridWidth / 2, pipesGridHeight / 2)
+        titleText.anchor.set(0.5, 0.5)
+        titleText.resolution = 4
+        menuContainer.addChild(titleText)
+
+        let spBorder = new PIXI.Graphics()
+        spBorder.lineStyle({ color: 0xffaaaa, width: 0.2})
+        spBorder.beginFill(0x222222)
+        spBorder.drawRect(pipesGridWidth / 2 - 10, pipesGridHeight / 4 - 2, 20, 4)
+        spBorder.interactive = true
+        menuContainer.addChild(spBorder)
+
         let spText = new PIXI.Text('Solo', { fill: 0xffaaaa })
         spText.scale.set(0.08, 0.08)
         spText.position.set(pipesGridWidth / 2, pipesGridHeight / 4)
         spText.anchor.set(0.5, 0.5)
-        spText.interactive = true
-        this.gameContainer.addChild(spText)
+        spText.resolution = 4
+        menuContainer.addChild(spText)
+
+        let mpBorder = new PIXI.Graphics()
+        mpBorder.lineStyle({ color: 0xffaaaa, width: 0.2})
+        mpBorder.beginFill(0x222222)
+        mpBorder.drawRect(pipesGridWidth / 2 - 10, 3 * pipesGridHeight / 4 - 2, 20, 4)
+        mpBorder.interactive = true
+        menuContainer.addChild(mpBorder)
 
         let mpText = new PIXI.Text('Multiplayer', { fill: 0xffaaaa })
         mpText.scale.set(0.08, 0.08)
         mpText.position.set(pipesGridWidth / 2, 3 * pipesGridHeight / 4)
         mpText.anchor.set(0.5, 0.5)
-        mpText.interactive = true
-        this.gameContainer.addChild(mpText)
+        mpText.resolution = 4
+        menuContainer.addChild(mpText)
 
-        spText.on('mousedown', (event) => {
-            this.gameContainer.removeChild(spText)
-            this.gameContainer.removeChild(mpText)
+        spBorder.on('mousedown', (event) => {
+            this.gameContainer.removeChild(menuContainer)
             this.finishCreate()
         })
 
-        mpText.on('mousedown', () => {
-            this.gameContainer.removeChild(spText)
-            this.gameContainer.removeChild(mpText)
+        mpBorder.on('mousedown', () => {
+            this.gameContainer.removeChild(menuContainer)
             this.connectingText = new PIXI.Text('Connecting...', { fill: 0xffaaaa })
             this.connectingText.scale.set(0.08, 0.08)
             this.connectingText.position.set(pipesGridWidth / 2, pipesGridHeight / 2)
@@ -76,12 +102,6 @@ export class OccultIt {
             connect()
             this.continueCreate(250)
         })
-
-        /*if (singlePlayer()) {
-            this.finishCreate()
-        } else {
-            this.continueCreate(250)
-        }*/
     }
 
     continueCreate(timeout) {
