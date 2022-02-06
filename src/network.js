@@ -2,12 +2,13 @@ import Peer from 'peerjs'
 import state from './state'
 
 let peer = null
-let hostId = 'occult-77'
+let hostId = 'occult-77-peer-to-peer'
 
 export class NetCommandId {
   static game = 'game'
   static player = 'player'
   static pipe = 'pipe'
+  static connectToPeers = 'connectToPeers'
 }
 
 let connections = new Set()
@@ -50,17 +51,40 @@ export function connect() {
     setTimeout(() =>
       {
         let conn = peer.connect(hostId)
-        // Keep track of connections in the case of the client this
-        // will only ever be one.
+        // Keep track of connections
         console.log("Conn ", conn)
         connections.add(conn)
+        peer.on('connection', (clientConnection) => {
+          console.log("Another client connected to this client")
+
+          clientConnection.on('open', () => {
+            console.log("Connection opened to another client", clientConnection)
+            const otherClientId = clientConnection.peer
+            console.log("otherClientId: ", otherClientId)
+            clientConnection.on('data', (data) => {
+              // Add to clients inState
+              console.log("Client: Got data from another client: ", data)
+              inState.push(data)
+            })
+          })
+
+        })
+
         conn.on('open', () => {
-          console.log("Peer opened as client")
           connected = true
+          console.log("Connected to host as client", conn)
+          const clientId = conn.provider.id
+          console.log("ClientId: ", clientId)
           conn.on('data', (data) => {
             // Add to clients inState
-            //console.log("Got data: ", data)
-            inState.push(data)
+            console.log("Client: Got data: ", data)
+            if (data.command == NetCommandId.connectToPeers) {
+              data.peers.forEach(peer => {
+                makePeerConnection(peer)
+              });
+            } else {
+              inState.push(data)
+            }
           })
         })
       }, 1000)
@@ -85,17 +109,41 @@ export function connect() {
       conn.on('data', (data) => {
         // Add to Host inState
         inState.push(data)
-        // Forward Data to Peers Except current Conn
-        let currentConn = conn
-        connections.forEach((conn) =>
-          // Don't send data to current connection
-          {if (conn.connectionId !== currentConn.connectionId) conn.send(data)})
       })
+      const otherConnections = [...connections].filter(c => c.connectionId != conn.connectionId)
+
+      if (otherConnections.length > 0) {
+        const otherPeerIds = otherConnections.map(c => c.peer)
+
+        console.log("Sending peer-ids of others to this new client")
+        console.log("Others: ", otherPeerIds)
+
+        conn.send({
+          command: NetCommandId.connectToPeers,
+          peers: otherPeerIds,
+        })
+      }
+
       console.log("Sending Initial State ", state)
       conn.send({
         command: NetCommandId.game,
         state: state
       })
+    })
+  })
+}
+
+function makePeerConnection(peerId) {
+  let conn = peer.connect(peerId)
+  // Keep track of connections
+  console.log("Connected to other client ", conn)
+  connections.add(conn)
+  conn.on('open', () => {
+    console.log("Connection opened between two clients", conn)
+    conn.on('data', (data) => {
+      // Add to clients inState
+      console.log("Client: Got data from other client: ", data)
+      inState.push(data)
     })
   })
 }
