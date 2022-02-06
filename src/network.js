@@ -56,6 +56,7 @@ export function connect() {
         connections.add(conn)
         conn.on('open', () => {
           console.log("Peer opened as client")
+          connected = true
           conn.on('data', (data) => {
             // Add to clients inState
             //console.log("Got data: ", data)
