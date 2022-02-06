@@ -215,16 +215,15 @@ F/Ctrl: Fix
         if (inState.length > 0) {
             const aNewState = inState.shift()
 
-            console.log("Got state", aNewState)
+            //console.log("Got state", aNewState)
             if (aNewState.command == NetCommandId.game) {
+                console.log("Received game state: ", aNewState)
                 while (this.gameContainer.children.length > 0) {
                     this.gameContainer.removeChild(this.gameContainer.children[0])
                 }
-                console.log("Cleared container")
                 this.players = []
                 state.tiles = aNewState.state.tiles
                 state.players = aNewState.state.players
-                console.log("Players: ", state.players)
                 state.console = aNewState.state.console
                 this.theConsole.setState(state.console)
 
@@ -238,6 +237,8 @@ F/Ctrl: Fix
 
                 window.players = this.players
 
+                console.log("Players in new game: ", state.players)
+
                 this.addSprites()
                 setOutState({
                     command: NetCommandId.player,
@@ -245,11 +246,11 @@ F/Ctrl: Fix
                 })
             } else if (state.tiles) {
                 if (aNewState.command == NetCommandId.player) {
-                    console.log(aNewState.movement.id)
+                    // console.log(aNewState.movement.id)
                     const updatePlayer = this.players.find(p => p.movement.id == aNewState.movement.id)
 
                     if (updatePlayer) {
-                        console.log("Updating player", updatePlayer)
+                        // console.log("Updating player", updatePlayer)
                         const updateStateIndex = state.players.findIndex(ps => ps.id == aNewState.movement.id)
                         
                         aNewState.movement.pos = new Vector2(aNewState.movement.pos.x, aNewState.movement.pos.y)
@@ -263,6 +264,7 @@ F/Ctrl: Fix
                             }
                     } else {
                         // a new player 
+                        console.log("Adding player: ", aNewState.movement.id)
                         const playerState = {
                             id: aNewState.movement.id,
                             pos: new Vector2(aNewState.movement.pos.x, aNewState.movement.pos.y),

@@ -53,7 +53,7 @@ export function connect() {
       {
         let conn = peer.connect(hostId)
         // Keep track of connections
-        console.log("Conn ", conn)
+        console.log("Connecting to host ", conn)
         connections.add(conn)
         peer.on('connection', (clientConnection) => {
           connections.add(clientConnection)
@@ -65,7 +65,7 @@ export function connect() {
             console.log("otherClientId: ", otherClientId)
             clientConnection.on('data', (data) => {
               // Add to clients inState
-              console.log("Client: Got data from another client: ", data)
+              //console.log("Client: Got data from another client: ", data)
               inState.push(data)
             })
           })
@@ -80,7 +80,7 @@ export function connect() {
           console.log("ClientId: ", clientId)
           conn.on('data', (data) => {
             // Add to clients inState
-            console.log("Client: Got data: ", data)
+            //console.log("Client: Got data: ", data)
             if (data.command == NetCommandId.connectToPeers) {
               data.peers.forEach(peer => {
                 makePeerConnection(peer)
@@ -146,10 +146,10 @@ function makePeerConnection(peerId) {
   console.log("Connected to other client ", conn)
   connections.add(conn)
   conn.on('open', () => {
-    console.log("Connection opened between two clients", conn)
+    console.log("Connection opened to another client", conn)
     conn.on('data', (data) => {
       // Add to clients inState
-      console.log("Client: Got data from other client: ", data)
+      //console.log("Client: Got data from another client: ", data)
       inState.push(data)
     })
   })
