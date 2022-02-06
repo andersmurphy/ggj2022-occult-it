@@ -2,12 +2,14 @@ import Peer from 'peerjs'
 import state from './state'
 
 let peer = null
-let hostId = 'occult-77'
+let hostId = 'occult-77-peer-to-peer'
 
 export class NetCommandId {
   static game = 'game'
   static player = 'player'
   static pipe = 'pipe'
+  static connectToPeers = 'connectToPeers'
+  static removePlayer = 'removePlayer'
 }
 
 let connections = new Set()
@@ -50,21 +52,50 @@ export function connect() {
     setTimeout(() =>
       {
         let conn = peer.connect(hostId)
-        // Keep track of connections in the case of the client this
-        // will only ever be one.
-        console.log("Conn ", conn)
+        // Keep track of connections
+        console.log("Connecting to host ", conn)
         connections.add(conn)
+        peer.on('connection', (clientConnection) => {
+          connections.add(clientConnection)
+          console.log("Another client connected to this client")
+
+          clientConnection.on('open', () => {
+            console.log("Connection opened from another client", clientConnection)
+            const otherClientId = clientConnection.peer
+            console.log("otherClientId: ", otherClientId)
+            clientConnection.on('data', (data) => {
+              // Add to clients inState
+              //console.log("Client: Got data from another client: ", data)
+              inState.push(data)
+            })
+          })
+
+          clientConnection.on('close', () => onConnectionClosed(clientConnection))
+        })
+
         conn.on('open', () => {
-          console.log("Peer opened as client")
+          connected = true
+          console.log("Connected to host as client", conn)
+          const clientId = conn.provider.id
+          console.log("ClientId: ", clientId)
           conn.on('data', (data) => {
             // Add to clients inState
-            //console.log("Got data: ", data)
-            inState.push(data)
+            //console.log("Client: Got data: ", data)
+            if (data.command == NetCommandId.connectToPeers) {
+              data.peers.forEach(peer => {
+                makePeerConnection(peer)
+              });
+            } else {
+              inState.push(data)
+            }
           })
         })
+
+        conn.on('close', () => onConnectionClosed(conn))
       }, 1000)
   })
 
+  // HOST CODE
   peer.on('open', (id) => {
     connected = true
 
@@ -75,28 +106,65 @@ export function connect() {
     }
   })
 
-  // HOST CODE
   peer.on('connection', (conn) => {
     // Keep track of connections
     connections.add(conn)
     conn.on('open', () => {
-      console.log(`${conn} connected`, conn)
+      console.log("A client connected", conn)
       conn.on('data', (data) => {
         // Add to Host inState
         inState.push(data)
-        // Forward Data to Peers Except current Conn
-        let currentConn = conn
-        connections.forEach((conn) =>
-          // Don't send data to current connection
-          {if (conn.connectionId !== currentConn.connectionId) conn.send(data)})
       })
+      const otherConnections = [...connections].filter(c => c.connectionId != conn.connectionId)
+
+      if (otherConnections.length > 0) {
+        const otherPeerIds = otherConnections.map(c => c.peer)
+
+        console.log("Sending peer-ids of others to this new client")
+        console.log("Others: ", otherPeerIds)
+
+        conn.send({
+          command: NetCommandId.connectToPeers,
+          peers: otherPeerIds,
+        })
+      }
+
       console.log("Sending Initial State ", state)
       conn.send({
         command: NetCommandId.game,
         state: state
       })
     })
+
+    conn.on('close', () => onConnectionClosed(conn))
   })
+}
+
+function makePeerConnection(peerId) {
+  let conn = peer.connect(peerId)
+  // Keep track of connections
+  console.log("Connected to other client ", conn)
+  connections.add(conn)
+  conn.on('open', () => {
+    console.log("Connection opened to another client", conn)
+    conn.on('data', (data) => {
+      // Add to clients inState
+      //console.log("Client: Got data from another client: ", data)
+      inState.push(data)
+    })
+  })
+
+  conn.on('close', () => onConnectionClosed(conn))
+}
+
+function onConnectionClosed(conn) {
+  console.log("Connection did close: ", conn)
+  if (connections.delete(conn)) {
+    inState.push({
+      command: NetCommandId.removePlayer,
+      id: conn.peer
+    })
+  }
 }
 
 window.connect = connect
