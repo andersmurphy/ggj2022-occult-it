@@ -9,6 +9,7 @@ export class NetCommandId {
   static player = 'player'
   static pipe = 'pipe'
   static connectToPeers = 'connectToPeers'
+  static removePlayer = 'removePlayer'
 }
 
 let connections = new Set()
@@ -55,10 +56,11 @@ export function connect() {
         console.log("Conn ", conn)
         connections.add(conn)
         peer.on('connection', (clientConnection) => {
+          connections.add(clientConnection)
           console.log("Another client connected to this client")
 
           clientConnection.on('open', () => {
-            console.log("Connection opened to another client", clientConnection)
+            console.log("Connection opened from another client", clientConnection)
             const otherClientId = clientConnection.peer
             console.log("otherClientId: ", otherClientId)
             clientConnection.on('data', (data) => {
@@ -68,6 +70,7 @@ export function connect() {
             })
           })
 
+          clientConnection.on('close', () => onConnectionClosed(clientConnection))
         })
 
         conn.on('open', () => {
@@ -87,9 +90,12 @@ export function connect() {
             }
           })
         })
+
+        conn.on('close', () => onConnectionClosed(conn))
       }, 1000)
   })
 
+  // HOST CODE
   peer.on('open', (id) => {
     connected = true
 
@@ -100,12 +106,11 @@ export function connect() {
     }
   })
 
-  // HOST CODE
   peer.on('connection', (conn) => {
     // Keep track of connections
     connections.add(conn)
     conn.on('open', () => {
-      console.log(`${conn} connected`, conn)
+      console.log("A client connected", conn)
       conn.on('data', (data) => {
         // Add to Host inState
         inState.push(data)
@@ -130,6 +135,8 @@ export function connect() {
         state: state
       })
     })
+
+    conn.on('close', () => onConnectionClosed(conn))
   })
 }
 
@@ -146,6 +153,18 @@ function makePeerConnection(peerId) {
       inState.push(data)
     })
   })
+
+  conn.on('close', () => onConnectionClosed(conn))
+}
+
+function onConnectionClosed(conn) {
+  console.log("Connection did close: ", conn)
+  if (connections.delete(conn)) {
+    inState.push({
+      command: NetCommandId.removePlayer,
+      id: conn.peer
+    })
+  }
 }
 
 window.connect = connect

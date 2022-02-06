@@ -8,6 +8,7 @@ import { Console } from './console.js'
 import { getNetworkId, inState, singlePlayer, isConnected, isHost, NetCommandId, setOutState } from './network.js'
 import { addWalls, loadWWallSprites } from './walls.js'
 import { addFloorAssets, addFloorSprites } from './floor.js'
+import _ from 'lodash'
 
 export class OccultIt {
     engine
@@ -272,6 +273,14 @@ F/Ctrl: Fix
                         state.players.push(playerState)
                         this.gameContainer.addChild(player.sprite)
                     }
+                } else if (aNewState.command == NetCommandId.removePlayer) {
+                    const removedPlayers = _.remove(this.players, p => p.movement.id == aNewState.id)
+                    _.remove(state.players, p => p.id == aNewState.id)
+
+                    removedPlayers.forEach(removedPlayer => {
+                        console.log("Removing player: ", removedPlayer.movement.id)
+                        this.gameContainer.removeChild(removedPlayer.sprite)
+                    });
                 } else if (aNewState.command == NetCommandId.pipe) {
                     updatePipeState(aNewState.pipe, this.gameContainer)
                 }
